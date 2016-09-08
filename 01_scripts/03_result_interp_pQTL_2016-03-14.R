@@ -9,11 +9,11 @@
 require(qtl)
 
 # Set working directory
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/02_analysis")
+setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
 # Load data from permutation tests
-load("sfon_01_output.RData")
-load("sfon_02_output.RData")
+load("02_data/sfon_01_output.RData")
+load("02_data/sfon_02_output.RData")
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,

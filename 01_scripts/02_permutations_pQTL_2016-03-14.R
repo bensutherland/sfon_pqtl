@@ -34,6 +34,7 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
 
 
 
+
 #######2B SINGLE QTL, consider covariate#####
 # scanone (consider covariate)
 sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
