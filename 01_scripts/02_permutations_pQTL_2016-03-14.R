@@ -27,12 +27,26 @@ num.cluster = 20
 ####### 2A Single QTL, no covariate #####
 # scanone (no covar), includes sex-specific phenos
 all.out.0.nocov <- scanone(sfon, method="hk", pheno.col = c(names(ph.no.cov), ph.sex.sp))
-# Genome-Wide permutations
+# Genome-wide permutations
 all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov), ph.sex.sp),
                                 n.perm=num.perm, verbose=T,
                                 n.cluster = num.cluster)
 
+# Chromosome-wide permutations
+temp = NULL
+pheno.lev = NULL
+pheno.names = NULL
 
+for(pheno in c(names(ph.no.cov), ph.sex.sp)) {
+  chr.sig = NULL
+  for(chr in as.numeric(names(sfqtl$geno))) {
+    temp = scanone(sfqtl, method="hk", pheno.col=pheno, chr=chr, n.perm=num.perm, verbose=T, n.cluster = num.cluster)
+    chr.sig = c(chr.sig, summary(temp, 0.05))
+  }
+  pheno.names = c(pheno.names, names(sfqtl$pheno[pheno])) # gathers the names for tested phenos
+  pheno.lev = c(pheno.lev, mean(chr.sig)) # finds an average chromosome-wide significance for each trait
+}
+names(pheno.lev) <- pheno.names #gives names to the average significance levels
 
 
 #######2B SINGLE QTL, consider covariate#####
