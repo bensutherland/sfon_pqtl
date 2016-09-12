@@ -18,35 +18,72 @@ require(plyr)
 # set working directory for the cluster computer
 
 # Load Part 1 results:
-load("sfon_01_output.RData")
+load("02_data/sfon_01_output.RData")
 
 # Set permutation variables (perm should be 1000):
 num.perm = 1000
 num.cluster = 20
 
+
 ####### 2A Single QTL, no covariate #####
-# scanone (no covar), includes sex-specific phenos
+# Create scanone object for phenos not requiring covariate (includes sex-specific phenos)
 all.out.0.nocov <- scanone(sfon, method="hk", pheno.col = c(names(ph.no.cov), ph.sex.sp))
+
 # Genome-wide permutations
 all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov), ph.sex.sp),
                                 n.perm=num.perm, verbose=T,
                                 n.cluster = num.cluster)
 
-# Chromosome-wide permutations
-temp = NULL
-pheno.lev = NULL
-pheno.names = NULL
+########### Chromosome-wide permutations (in progress) #####
+# need to retain the scanone object
+# these are the phenos usually used: c(names(ph.no.cov), ph.sex.sp)
 
-for(pheno in c(names(ph.no.cov), ph.sex.sp)) {
+# choose phenos to test:
+selected.phenos <- ph.sex.sp[2:3]
+selected.chrs <- as.numeric(names(sfon$geno))[1:3]
+
+# set nulls
+chr.scan = NULL
+chr.scan.perm = NULL
+pheno.names = NULL
+pheno.sig.lod.per.chr = NULL
+save.chr.levs = NULL
+scanone.mods <- list()
+
+# loop
+for(pheno in selected.phenos) {
   chr.sig = NULL
-  for(chr in as.numeric(names(sfqtl$geno))) {
-    temp = scanone(sfqtl, method="hk", pheno.col=pheno, chr=chr, n.perm=num.perm, verbose=T, n.cluster = num.cluster)
-    chr.sig = c(chr.sig, summary(temp, 0.05))
-  }
-  pheno.names = c(pheno.names, names(sfqtl$pheno[pheno])) # gathers the names for tested phenos
-  pheno.lev = c(pheno.lev, mean(chr.sig)) # finds an average chromosome-wide significance for each trait
+  for(chr in selected.chrs) {
+    chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
+    chr.scan.perm = scanone(sfon, method="hk", 
+                       pheno.col=pheno, chr=chr, 
+                       n.perm=num.perm, n.cluster = num.cluster 
+                       , verbose=T
+                       )
+    chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
+    scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
+    }
+  pheno.names = c(pheno.names, names(sfon$pheno[pheno])) # obtain the name of the tested pheno in this loop
+  #pheno.lev = c(pheno.lev, mean(chr.sig)) # finds an average chromosome-wide significance for each trait (NEED TO CORRECT!)
+  pheno.sig.lod.per.chr = cbind(pheno.sig.lod.per.chr, chr.sig)
 }
-names(pheno.lev) <- pheno.names #gives names to the average significance levels
+colnames(pheno.sig.lod.per.chr) <- pheno.names #gives names to the average significance levels
+pheno.sig.lod.per.chr
+scanone.mods
+
+### this part will be in part 3 eventually ###
+# next will need to find a way to extract the CW-significant QTL
+#e.g.
+summary(scanone.mods[["male.sperm.conc_1"]], threshold = 1.2)
+summary(scanone.mods[["male.sperm.conc_1"]], threshold = pheno.sig.lod.per.chr[1,"male.sperm.conc"])
+
+# extract chromosome-wide significance from scanone object:
+for(pheno in selected.phenos) {
+  for(chr in selected.chrs) {
+    print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]))  
+  }
+}
+### this part will be in part 3 eventually ###
 
 
 #######2B SINGLE QTL, consider covariate#####
@@ -99,6 +136,6 @@ operm.bin <- scanone(sfon, pheno.col="binary",
 
 
 ### SAVE OUT PERMUTATION OBJECT ####
-save.image(file = "sfon_02_output.RData") # save out existing data so that it can be reloaded without running all again
+#save.image(file = "sfon_02_output.RData") # save out existing data so that it can be reloaded without running all again
 
 #END
