@@ -33,49 +33,68 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
                                 n.perm=num.perm, verbose=T,
                                 n.cluster = num.cluster)
 
-#### Chromosome-wide permutations ####
-# choose phenos to test:
-selected.phenos <- c(names(ph.no.cov), ph.sex.sp)
-selected.chrs <- as.numeric(names(sfon$geno))
+## Chromosome-wide significance using for loop for pheno and chr, 
+## includes if/else statement to use the covariate of sex when required
+## collects scanone objects and the chromosome-level p = 0.05 sig LOD
 
-# Loop variables
-chr.scan = NULL
-chr.scan.perm = NULL
-chr.sig = NULL
-scanone.mods <- list()
-pheno.names = NULL
-pheno.sig.lod.per.chr = NULL
+# select your phenotypes and chromosomes
+all.phenos <- c(names(ph.no.cov), ph.sex.sp, names(ph.yes.cov))
+selected.chrs <- 1:3
 
-for(pheno in selected.phenos) {
-  chr.sig = NULL # cleared and re-used each loop
+# set NULLs
+chr.scan = NULL # a scanone object rewritten each chromosome
+chr.scan.perm = NULL # scanone object with permutations rewritten each chromosome
+chr.sig = NULL # this is the LOD level for each chromosome at p = 0.05
+scanone.mods <- list() # this is a list of scanone objects, one for each pheno x chr
+pheno.names = NULL # this is a vector of the names of tested phenotypes
+pheno.sig.lod.per.chr = NULL # this is the LOD sig level for each pheno x chr
+
+# Loop across phenos, and chromosomes
+for(pheno in all.phenos) {
+  chr.sig = NULL # set NULL each pheno loop
   for(chr in selected.chrs) {
-    chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
-    chr.scan.perm = scanone(sfon, method="hk", 
-                       pheno.col=pheno, chr=chr, 
-                       n.perm=num.perm, n.cluster = num.cluster 
-                       , verbose=T
-                       )
-    chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
-    scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
-    }
-  pheno.names = c(pheno.names, names(sfon$pheno[pheno])) # obtain the name of the tested pheno in this loop
-  pheno.sig.lod.per.chr = cbind(pheno.sig.lod.per.chr, chr.sig)
+if (pheno %in% names(ph.yes.cov)) {
+  # use covariate if needed
+  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr, addcov=sex)
+  chr.scan.perm = scanone(sfon, method="hk", 
+                          pheno.col=pheno, chr=chr, addcov=sex,
+                          n.perm=num.perm, n.cluster = num.cluster 
+                          , verbose=T)
+  chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
+  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
+} else {
+  # don't use covariate
+  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
+  chr.scan.perm = scanone(sfon, method="hk", 
+                          pheno.col=pheno, chr=chr, 
+                          n.perm=num.perm, n.cluster = num.cluster 
+                          , verbose=T)
+  chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
+  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
+}
+}
+pheno.names = c(pheno.names, names(sfon$pheno[pheno])) # obtain the name of the tested pheno in this loop
+pheno.sig.lod.per.chr = cbind(pheno.sig.lod.per.chr, chr.sig)
 }
 colnames(pheno.sig.lod.per.chr) <- pheno.names #gives names to the average significance levels
 pheno.sig.lod.per.chr
 scanone.mods
 
+
+str(scanone.mods)
+
+
 ### this part will be in part 3 eventually ###
 # next will need to find a way to extract the CW-significant QTL
 #e.g.
-summary(scanone.mods[["male.sperm.conc_1"]], threshold = 1.2)
-summary(scanone.mods[["male.sperm.conc_1"]], threshold = pheno.sig.lod.per.chr[1,"male.sperm.conc"])
+summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2)
+summary(scanone.mods[["weight.g_0509_1"]], threshold = pheno.sig.lod.per.chr[1,"weight.g_0509"])
 
-# extract chromosome-wide significance from scanone object:
+# Extract chromosome-wide significance from scanone object:
 test <- NULL
 
 test <- capture.output(
-for(pheno in selected.phenos) {
+for(pheno in all.phenos) {
   for(chr in selected.chrs) {
     print(c(pheno, chr), quote = F)
     print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]), quote = F)
