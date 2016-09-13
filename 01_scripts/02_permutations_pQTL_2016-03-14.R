@@ -24,7 +24,6 @@ load("02_data/sfon_01_output.RData")
 num.perm = 1000
 num.cluster = 20
 
-
 ####### 2A Single QTL, no covariate #####
 # Create scanone object for phenos not requiring covariate (includes sex-specific phenos)
 all.out.0.nocov <- scanone(sfon, method="hk", pheno.col = c(names(ph.no.cov), ph.sex.sp))
@@ -34,25 +33,21 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
                                 n.perm=num.perm, verbose=T,
                                 n.cluster = num.cluster)
 
-########### Chromosome-wide permutations (in progress) #####
-# need to retain the scanone object
-# these are the phenos usually used: c(names(ph.no.cov), ph.sex.sp)
-
+#### Chromosome-wide permutations ####
 # choose phenos to test:
-selected.phenos <- ph.sex.sp[2:3]
-selected.chrs <- as.numeric(names(sfon$geno))[1:3]
+selected.phenos <- c(names(ph.no.cov), ph.sex.sp)
+selected.chrs <- as.numeric(names(sfon$geno))
 
-# set nulls
+# Loop variables
 chr.scan = NULL
 chr.scan.perm = NULL
+chr.sig = NULL
+scanone.mods <- list()
 pheno.names = NULL
 pheno.sig.lod.per.chr = NULL
-save.chr.levs = NULL
-scanone.mods <- list()
 
-# loop
 for(pheno in selected.phenos) {
-  chr.sig = NULL
+  chr.sig = NULL # cleared and re-used each loop
   for(chr in selected.chrs) {
     chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
     chr.scan.perm = scanone(sfon, method="hk", 
@@ -64,7 +59,6 @@ for(pheno in selected.phenos) {
     scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
     }
   pheno.names = c(pheno.names, names(sfon$pheno[pheno])) # obtain the name of the tested pheno in this loop
-  #pheno.lev = c(pheno.lev, mean(chr.sig)) # finds an average chromosome-wide significance for each trait (NEED TO CORRECT!)
   pheno.sig.lod.per.chr = cbind(pheno.sig.lod.per.chr, chr.sig)
 }
 colnames(pheno.sig.lod.per.chr) <- pheno.names #gives names to the average significance levels
@@ -78,11 +72,18 @@ summary(scanone.mods[["male.sperm.conc_1"]], threshold = 1.2)
 summary(scanone.mods[["male.sperm.conc_1"]], threshold = pheno.sig.lod.per.chr[1,"male.sperm.conc"])
 
 # extract chromosome-wide significance from scanone object:
+test <- NULL
+
+test <- capture.output(
 for(pheno in selected.phenos) {
   for(chr in selected.chrs) {
-    print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]))  
+    print(c(pheno, chr), quote = F)
+    print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]), quote = F)
   }
 }
+)
+# can use gsub to remove the annoying quotes and backslash (NOT WORKING)
+# gsub(pattern = "\"", replacement = "", x = test)
 ### this part will be in part 3 eventually ###
 
 
@@ -108,6 +109,11 @@ operm.im <- scanone(sfon, addcovar=sex, intcovar=sex, n.perm=num.perm,
                     pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
                     n.cluster = num.cluster)
 #note: at ~ 100perms/2h; therefore to scale make sure to use n.cluster
+
+
+# chromosome-wide
+
+
 
 #####2C SEX AS A BINARY TRAIT####
 sfon$pheno <- cbind(sfon$pheno, binary=sex)
