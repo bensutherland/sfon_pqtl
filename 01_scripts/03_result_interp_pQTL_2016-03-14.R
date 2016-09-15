@@ -402,4 +402,85 @@ out.fq <- fitqtl(sfon, qtl=qtl.trait, formula=y~Q1+Q2+Q3) # put all of the QTL i
 summary(out.fq) # this will give the PVE
 plot(qtl.object) # this will put the QTL on your genetic map
 
+# example with weight.g_0509
+qtl.weight.g_0509 <- makeqtl(sfon, chr = c("5","20"), pos = c(261,162)
+                             , what="draws" # to use prob, requires imputation using hk
+                             )
+summary(qtl.weight.g_0509)
+out.weight.g_0509.fq <- fitqtl(sfon, pheno.col="weight.g_0509", qtl=qtl.weight.g_0509, formula=y~Q1+Q2
+                               #, covar=sex.df
+                               )
+
+# need to put in the covariate? doesn't seem to affect anything
+summary(out.weight.g_0509.fq)
+
+# example with weight.g_0709
+qtl.weight.g_0709 <- makeqtl(sfon, chr=c("4","5"), pos = c(28.3, 198.5), what = "draws")
+out.weight.g_0709 <- fitqtl(sfon, pheno.col="weight.g_0709", qtl=qtl.weight.g_0709, formula=y~Q1+Q2)
+summary(out.weight.g_0709)
+
+# example to find pve from a single qtl
+qtl.weight.g_1109 <- makeqtl(sfon, chr=c("20"), pos = c(169), what = "draws")
+out.weight.g_1109 <- fitqtl(sfon, pheno.col="weight.g_1109", qtl=qtl.weight.g_1109, formula=y~Q1)
+summary(out.weight.g_1109)
+
+# TCS_T1.T2
+qtl.TCS_T1.T2 <- makeqtl(sfon, chr=c("9"), pos = c(184), what = "draws")
+out.TCS_T1.T2 <- fitqtl(sfon, pheno.col="TCS_T1.T2", qtl=qtl.TCS_T1.T2, formula=y~Q1)
+summary(out.TCS_T1.T2)
+
+# TCS_T2.T3
+qtl.TCS_T2.T3 <- makeqtl(sfon, chr=c("3","36"), pos = c(35.7, 31.4), what = "draws")
+out.TCS_T2.T3 <- fitqtl(sfon, pheno.col="TCS_T2.T3", qtl=qtl.TCS_T2.T3, formula=y~Q1+Q2)
+summary(out.TCS_T2.T3)
+
+# TCS_T1.T3
+qtl.TCS_T1.T3 <- makeqtl(sfon, chr=c("36"), pos = c(61.8), what = "draws")
+out.TCS_T1.T3 <- fitqtl(sfon, pheno.col="TCS_T1.T3", qtl=qtl.TCS_T1.T3, formula=y~Q1)
+summary(out.TCS_T1.T3)
+
+# leng.cm_0509
+qtl.leng.cm_0509 <- makeqtl(sfon, chr=c("5","34"), pos = c(261,110), what = "draws")
+out.leng.cm_0509 <- fitqtl(sfon, pheno.col="leng.cm_0509", qtl=qtl.leng.cm_0509, formula=y~Q1+Q2)
+summary(out.leng.cm_0509)
+
+# leng.cm_0709
+qtl.leng.cm_0709 <- makeqtl(sfon, chr=c("4","5"), pos = c(115,261), what = "draws")
+out.leng.cm_0709 <- fitqtl(sfon, pheno.col="leng.cm_0709", qtl=qtl.leng.cm_0709, formula=y~Q1+Q2)
+summary(out.leng.cm_0709)
+
+# leng.cm_1109
+qtl.leng.cm_1109 <- makeqtl(sfon, chr=c("20"), pos = c(169), what = "draws")
+out.leng.cm_1109 <- fitqtl(sfon, pheno.col="leng.cm_1109", qtl=qtl.leng.cm_1109, formula=y~Q1)
+summary(out.leng.cm_1109)
+
+# condit.fact_T3
+qtl.condit.fact_T3 <- makeqtl(sfon, chr=c("20"), pos = c(150), what = "draws")
+out.condit.fact_T3 <- fitqtl(sfon, pheno.col="condit.fact_T3", qtl=qtl.condit.fact_T3, formula=y~Q1)
+summary(out.condit.fact_T3)
+
+# weight_liver.g
+qtl.weight_liver.g <- makeqtl(sfon, chr=c("35"), pos = c(24.5), what = "draws")
+out.weight_liver.g <- fitqtl(sfon, pheno.col="weight_liver.g", qtl=qtl.weight_liver.g, formula=y~Q1)
+summary(out.weight_liver.g)
+
+# osmo.delta
+qtl.osmo.delta <- makeqtl(sfon, chr=c("13"), pos = c(26.5), what = "draws")
+out.osmo.delta <- fitqtl(sfon, pheno.col="osmo.delta", qtl=qtl.osmo.delta, formula=y~Q1)
+summary(out.osmo.delta)
+
+# fem.egg.diam
+qtl.fem.egg.diam <- makeqtl(sfon, chr=c("5"), pos = c(66.8), what = "draws")
+out.fem.egg.diam <- fitqtl(sfon, pheno.col="fem.egg.diam", qtl=qtl.fem.egg.diam, formula=y~Q1)
+summary(out.fem.egg.diam)
+
+# plasma.chlor
+qtl.plasma.chlor <- makeqtl(sfon, chr=c("31"), pos = c(113.9), what = "draws")
+out.plasma.chlor <- fitqtl(sfon, pheno.col="plasma.chlor", qtl=qtl.plasma.chlor, formula=y~Q1)
+summary(out.plasma.chlor)
+
+# ghr
+qtl.ghr <- makeqtl(sfon, chr=c("24"), pos = c(138), what = "draws")
+out.ghr <- fitqtl(sfon, pheno.col="ghr", qtl=qtl.ghr, formula=y~Q1)
+summary(out.ghr)
 
