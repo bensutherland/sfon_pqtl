@@ -484,3 +484,6 @@ qtl.ghr <- makeqtl(sfon, chr=c("24"), pos = c(138), what = "draws")
 out.ghr <- fitqtl(sfon, pheno.col="ghr", qtl=qtl.ghr, formula=y~Q1)
 summary(out.ghr)
 
+
+##### PHENO BY GENO GRAPHS ####
+
