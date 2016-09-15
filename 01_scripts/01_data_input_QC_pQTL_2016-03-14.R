@@ -206,12 +206,12 @@ for(i in phenos) {
   pvals.pxs = c(pvals.pxs, anova(aov(pheno.df[ ,i] ~ pheno.df$sex))$`Pr(>F)`[1])
 }
 names(pvals.pxs) <- phenos
-pvals.pxs[pvals.pxs < 0.05] # this displays which phenotypes could use a covariate
-length(pvals.pxs[pvals.pxs < 0.05]) # number of phenos needing covar
-ph.yes.cov <- which(pvals.pxs < 0.05) # phenos needing covariate
+pvals.pxs[pvals.pxs < 0.2] # this displays which phenotypes could use a covariate
+length(pvals.pxs[pvals.pxs < 0.2]) # number of phenos needing covar
+ph.yes.cov <- which(pvals.pxs < 0.2) # phenos needing covariate
 #ph.yes.cov.num <- match(names(ph.yes.cov), names(pheno.df))
 
-ph.no.cov <- which(pvals.pxs >= 0.05) # phenos NOT needing covariate
+ph.no.cov <- which(pvals.pxs >= 0.2) # phenos NOT needing covariate
 #ph.no.cov.num <- match(names(ph.no.cov), names(pheno.df))
 
 ph.sex.sp <- c("fem.egg.diam","male.sperm.conc","male.sperm.diam")
