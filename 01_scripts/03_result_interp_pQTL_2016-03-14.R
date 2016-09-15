@@ -17,7 +17,7 @@ load("02_data/sfon_02_output.RData")
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,
-                  error.prob=0.001, n.draws=256)
+                  error.prob=0.001, n.draws=256) #note that 4-way cross w sex-specific map assumes constant ratio of female:male recomb rates within inter-marker intervals
 str((sfon$geno[[1]])) # note that there is now probabilities and draws added to each LG
 
 ######### 3A RESULT INTERP, SINGLE QTL, no COV #######
@@ -25,14 +25,15 @@ str((sfon$geno[[1]])) # note that there is now probabilities and draws added to 
 names(ph.no.cov)
 summary(all.out.0.nocov, perms=all.out.0.nocov.perm, alpha=0.15, format="tabByCol", pvalues=TRUE)
 
-# start by setting your variables
-POI <- "fem.egg.diam" #set your pheno
+
+## Plot your LOD curves and genome-wide significance
+# Start by setting your variables
+POI <- "ghr" #set your pheno
 scanone.mod <- all.out.0.nocov
 scanone.perms <- all.out.0.nocov.perm
 
+# Then run the following
 lod.col <- which(names(scanone.mod) == POI) - 2 #-2 is to account for chr and pos
-
-# then plot
 plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
      #ylim = c(0,8), 
      ylab = POI,
@@ -40,7 +41,7 @@ plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
      bandcol="gray70")
 abline(h=summary(scanone.perms[,POI], 0.05), lty=1)
 
-# save scanone objects as 11 x 5
+# If saving, scanone objects as 11 x 5
 
 
 ######### 3B RESULT INTERP, SINGLE QTL, consider COV #######
@@ -74,7 +75,8 @@ summary(out.am, perms=operm.am, format="tabByCol", alpha=0.1, pvalues=T)
 # PLOT TO INSPECT INTERACTION #
 # View the LOD from the full, interactive and additive models
 # for example, a significant interaction was found with osmo.delta on chr13
-trait.lod = 12 #choose the trait lod column to plot
+names(out.fmim)
+trait.lod = 9 #choose the trait lod column to plot
 plot(out.im, out.im-out.am, out.am, ylab = "LOD score",
      col=c("blue", "red", "black"), alternate.chrid=T, lodcolumn=trait.lod,
      #main = "osmo.delta"
@@ -89,9 +91,8 @@ legend(x = "topright", legend=c("full","interact","additive"),
 names(out.am) # needs covariate
 
 ## REGULAR
-
 # start by setting your variables
-POI <- "chlor.delta" #set your pheno
+POI <- "weight_liver.g" #set your pheno
 scanone.mod <- out.am
 scanone.perms <- operm.am
 lod.col <- which(names(scanone.mod) == POI) - 2 #-2 is to account for chr and pos
@@ -105,6 +106,9 @@ plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
 abline(h=summary(scanone.perms[,POI], 0.05), lty=3)
 
 
+#Needs some special playing around to get the full model version rather than the additive model version
+names(out.fmim)
+plot(out.fmim, alternate.chrid = T, lodcolumn="weight_liver.g.f")
 
 
 
