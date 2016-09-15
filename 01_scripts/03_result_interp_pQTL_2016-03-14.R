@@ -151,6 +151,27 @@ legend("topright", legend = c("T1","T3"), fill = c("red", "black"))
 ### END SPECIAL TWO PLOT ###
 
 
+########EXTRACT RESULTS OF CHR-WIDE SIG######
+#e.g.
+summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2)
+summary(scanone.mods[["weight.g_0509_1"]], threshold = pheno.sig.lod.per.chr[1,"weight.g_0509"])
+
+# Extract chromosome-wide significance from scanone object:
+test <- NULL
+
+test <- capture.output(
+  for(pheno in all.phenos) {
+    for(chr in selected.chrs) {
+      print(c(pheno, chr), quote = F)
+      print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]), quote = F)
+    }
+  }
+)
+# can use gsub to remove the annoying quotes and backslash (NOT WORKING)
+# gsub(pattern = "\"", replacement = "", x = test)
+### this part will be in part 3 eventually ###
+
+
 ######### 3C RESULT INTERP, SEX AS A BINARY TRAIT #######
 # Bare bones plot
 plot(out.bin, col="red", ylab="LOD score",
@@ -366,4 +387,15 @@ names(subset.samplesizes)
 avg.sd.n.df <- as.data.frame(rbind(data, subset.samplesizes))
 str(avg.sd.n.df)
 write.csv(x = t(avg.sd.n.df), file = "avg.sd.n.csv", quote = F)
+
+
+########## PVE ######
+# for this use the following formulae (per trait)
+?makeqtl()
+qtl.trait <- makeqtl(sfon, chr=c(), pos=c())
+?fitqtl()
+out.fq <- fitqtl(sfon, qtl=qtl.trait, formula=y~Q1+Q2+Q3) # put all of the QTL in one formula
+summary(out.fq) # this will give the PVE
+plot(qtl.object) # this will put the QTL on your genetic map
+
 

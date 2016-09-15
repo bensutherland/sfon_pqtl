@@ -84,28 +84,6 @@ scanone.mods
 str(scanone.mods)
 
 
-### this part will be in part 3 eventually ###
-# next will need to find a way to extract the CW-significant QTL
-#e.g.
-summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2)
-summary(scanone.mods[["weight.g_0509_1"]], threshold = pheno.sig.lod.per.chr[1,"weight.g_0509"])
-
-# Extract chromosome-wide significance from scanone object:
-test <- NULL
-
-test <- capture.output(
-for(pheno in all.phenos) {
-  for(chr in selected.chrs) {
-    print(c(pheno, chr), quote = F)
-    print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]), quote = F)
-  }
-}
-)
-# can use gsub to remove the annoying quotes and backslash (NOT WORKING)
-# gsub(pattern = "\"", replacement = "", x = test)
-### this part will be in part 3 eventually ###
-
-
 #######2B SINGLE QTL, consider covariate#####
 # scanone (consider covariate)
 sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
