@@ -11,9 +11,12 @@ require(qtl)
 
 # Set working directory
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
+setwd("/Users/ben/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl") # MacPro2
 
 ##### IMPORT DATA #####
-sfon <- read.cross(format="mapqtl", dir="~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/02_data", 
+sfon <- read.cross(format="mapqtl"
+                   #, dir="~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/02_data", 
+                   , dir="/Users/ben/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl/02_data", 
                    genfile = "Sfon_female_map_v4.3.loc", 
                    mapfile = "Sfon_female_map_v4.3.map", 
                    phefile = "SFQTL_phenotypes-full.qua",

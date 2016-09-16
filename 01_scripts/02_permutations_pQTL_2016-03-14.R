@@ -22,7 +22,7 @@ load("02_data/sfon_01_output.RData")
 
 # Set permutation variables (perm should be 1000):
 num.perm = 1000
-num.cluster = 20
+num.cluster = 22
 
 ####### 2A Single QTL, no covariate #####
 # Create scanone object for phenos not requiring covariate (includes sex-specific phenos)
@@ -39,7 +39,7 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
 
 # select your phenotypes and chromosomes
 all.phenos <- c(names(ph.no.cov), ph.sex.sp, names(ph.yes.cov))
-selected.chrs <- 1:3
+selected.chrs <- 1:42
 
 # set NULLs
 chr.scan = NULL # a scanone object rewritten each chromosome
