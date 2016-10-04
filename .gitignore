@@ -3,3 +3,4 @@
 *.qua
 *.RData
 *~
+*.Rhistory
