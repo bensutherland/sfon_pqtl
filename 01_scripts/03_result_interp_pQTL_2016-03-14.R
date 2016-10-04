@@ -12,8 +12,9 @@ require(qtl)
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
 # Load data from permutation tests
-load("02_data/sfon_01_output.RData")
-load("02_data/sfon_02_output.RData")
+#load("02_data/sfon_01_output.RData")
+#load("02_data/sfon_02_output.RData")
+load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,

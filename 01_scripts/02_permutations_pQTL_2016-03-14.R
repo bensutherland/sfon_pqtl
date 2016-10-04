@@ -33,6 +33,31 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
                                 n.perm=num.perm, verbose=T,
                                 n.cluster = num.cluster)
 
+
+####### 2B SINGLE QTL, consider covariate #####
+# scanone (consider covariate)
+sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
+out.am <- scanone(sfon, method="hk", addcov=sex, 
+                  pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
+) # additive model
+out.im <- scanone(sfon, method="hk", addcov=sex, 
+                  intcovar=sex, 
+                  pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
+) # 'full' model
+
+# Genome-Wide permutations
+# set seed to directly compare full model and full-additive model
+set.seed(54955149)
+operm.am <- scanone(sfon, addcovar=sex, n.perm=num.perm,
+                    pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
+                    n.cluster = num.cluster)
+set.seed(54955149)
+operm.im <- scanone(sfon, addcovar=sex, intcovar=sex, n.perm=num.perm,
+                    pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
+                    n.cluster = num.cluster)
+#note: at ~ 100perms/2h; therefore to scale make sure to use n.cluster
+
+
 ## Chromosome-wide significance using for loop for pheno and chr, 
 ## includes if/else statement to use the covariate of sex when required
 ## collects scanone objects and the chromosome-level p = 0.05 sig LOD
@@ -82,34 +107,6 @@ scanone.mods
 
 
 str(scanone.mods)
-
-
-#######2B SINGLE QTL, consider covariate#####
-# scanone (consider covariate)
-sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
-out.am <- scanone(sfon, method="hk", addcov=sex, 
-                  pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
-                    ) # additive model
-out.im <- scanone(sfon, method="hk", addcov=sex, 
-                  intcovar=sex, 
-                  pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
-                    ) # 'full' model
-
-# Genome-Wide permutations
-# set seed to directly compare full model and full-additive model
-set.seed(54955149)
-operm.am <- scanone(sfon, addcovar=sex, n.perm=num.perm,
-                    pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
-                    n.cluster = num.cluster)
-set.seed(54955149)
-operm.im <- scanone(sfon, addcovar=sex, intcovar=sex, n.perm=num.perm,
-                    pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
-                    n.cluster = num.cluster)
-#note: at ~ 100perms/2h; therefore to scale make sure to use n.cluster
-
-
-# chromosome-wide
-
 
 
 #####2C SEX AS A BINARY TRAIT####
