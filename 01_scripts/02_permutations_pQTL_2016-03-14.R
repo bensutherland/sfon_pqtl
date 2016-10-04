@@ -16,13 +16,14 @@ require(plyr)
 #library(snow)
 
 # set working directory for the cluster computer
+setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 
 # Load Part 1 results:
 load("02_data/sfon_01_output.RData")
 
 # Set permutation variables (perm should be 1000):
 num.perm = 1000
-num.cluster = 22
+num.cluster = 20
 
 ####### 2A Single QTL, no covariate #####
 # Create scanone object for phenos not requiring covariate (includes sex-specific phenos)
@@ -60,11 +61,14 @@ operm.im <- scanone(sfon, addcovar=sex, intcovar=sex, n.perm=num.perm,
 
 ## Chromosome-wide significance using for loop for pheno and chr, 
 ## includes if/else statement to use the covariate of sex when required
-## collects scanone objects and the chromosome-level p = 0.05 sig LOD
+## collects scanone objects and the chromosome-level p = (chr.wide.pval) sig LOD
 
 # select your phenotypes and chromosomes
 all.phenos <- c(names(ph.no.cov), ph.sex.sp, names(ph.yes.cov))
 selected.chrs <- 1:42
+
+# set your pval
+chr.wide.pval <- 0.01
 
 # set NULLs
 chr.scan = NULL # a scanone object rewritten each chromosome
@@ -85,7 +89,7 @@ if (pheno %in% names(ph.yes.cov)) {
                           pheno.col=pheno, chr=chr, addcov=sex,
                           n.perm=num.perm, n.cluster = num.cluster 
                           , verbose=T)
-  chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
+  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
   scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
 } else {
   # don't use covariate
@@ -94,7 +98,7 @@ if (pheno %in% names(ph.yes.cov)) {
                           pheno.col=pheno, chr=chr, 
                           n.perm=num.perm, n.cluster = num.cluster 
                           , verbose=T)
-  chr.sig = c(chr.sig, summary(chr.scan.perm, 0.05))
+  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
   scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
 }
 }
