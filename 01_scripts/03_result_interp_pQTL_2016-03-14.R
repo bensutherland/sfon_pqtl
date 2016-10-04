@@ -199,7 +199,7 @@ tail(chr.wide.output, n = 5)
 
 write.csv(chr.wide.output, file = "test.csv", quote = F, row.names=F)
 # then in terminal:
-# grep -A1 'lod' test.csv | grep -v '--' - | less
+# grep -A1 'lod' test.csv | grep -v '--' - | awk -F, '{ print $2 }' | less
 
 # if want it back in:
 test <- read.csv(file = "test.csv", header = F)
