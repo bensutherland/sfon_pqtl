@@ -156,10 +156,10 @@ legend("topright", legend = c("T1","T3"), fill = c("red", "black"))
 ### END SPECIAL TWO PLOT ###
 
 
-########EXTRACT RESULTS OF CHR-WIDE SIG######
-#e.g.
-summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2)
+######## EXTRACT RESULTS OF CHR-WIDE SIG ######
+summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2) # for example
 summary(scanone.mods[["weight.g_0509_1"]], threshold = pheno.sig.lod.per.chr[1,"weight.g_0509"])
+
 
 # Extract chromosome-wide significance from scanone object:
 test <- NULL
@@ -169,12 +169,42 @@ test <- capture.output(
     for(chr in selected.chrs) {
       print(c(pheno, chr), quote = F)
       print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]), quote = F)
-    }
+      }
   }
 )
 # can use gsub to remove the annoying quotes and backslash (NOT WORKING)
 # gsub(pattern = "\"", replacement = "", x = test)
 ### this part will be in part 3 eventually ###
+
+# Try again:
+chr.wide.output <- NULL
+
+chr.wide.output <- 
+  capture.output(
+  for(pheno in all.phenos) {
+    for(chr in selected.chrs) {
+      paste(
+        cat(c(pheno, chr, "result"), sep = "_"),
+        print(summary(scanone.mods[[paste(pheno, "_", chr, sep="")]], threshold = pheno.sig.lod.per.chr[chr, pheno]))
+        )
+      }
+  }
+)
+
+str(chr.wide.output)
+tail(chr.wide.output, n = 5)
+
+### DELETE 
+#tail(gsub(pattern = "lod\n", replacement = "lod ", x = chr.wide.output, perl = T))
+
+write.csv(chr.wide.output, file = "test.csv", quote = F, row.names=F)
+# then in terminal:
+# grep -A1 'lod' test.csv | grep -v '--' - | less
+
+# if want it back in:
+test <- read.csv(file = "test.csv", header = F)
+
+
 
 
 ######### 3C RESULT INTERP, SEX AS A BINARY TRAIT #######
