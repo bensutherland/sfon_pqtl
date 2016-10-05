@@ -14,7 +14,9 @@ setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 # Load data from permutation tests
 #load("02_data/sfon_01_output.RData")
 #load("02_data/sfon_02_output.RData")
-load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance
+#load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance
+#load("02_data/sfon_02_output_chromosome-wide_p0.01_1000perms.RData") # 
+#load("02_data/sfon_02_output_chromosome-wide_p0.01_10000perms.RData") # 
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,
@@ -194,10 +196,7 @@ chr.wide.output <-
 str(chr.wide.output)
 tail(chr.wide.output, n = 5)
 
-### DELETE 
-#tail(gsub(pattern = "lod\n", replacement = "lod ", x = chr.wide.output, perl = T))
-
-write.csv(chr.wide.output, file = "test.csv", quote = F, row.names=F)
+write.csv(chr.wide.output, file = "chr_wide_p0.01_w_10000perms.csv", quote = F, row.names=F)
 # then in terminal:
 # grep -A1 'lod' test.csv | grep -v '--' - | awk -F, '{ print $2 }' | less
 
@@ -424,7 +423,7 @@ str(avg.sd.n.df)
 write.csv(x = t(avg.sd.n.df), file = "avg.sd.n.csv", quote = F)
 
 
-########## PVE ######
+########## PVE Genome Wide ######
 # for this use the following formulae (per trait)
 ?makeqtl()
 qtl.trait <- makeqtl(sfon, chr=c(), pos=c())
@@ -434,6 +433,7 @@ summary(out.fq) # this will give the PVE
 plot(qtl.object) # this will put the QTL on your genetic map
 
 # example with weight.g_0509
+sex.df <- as.data.frame(sex)
 qtl.weight.g_0509 <- makeqtl(sfon, chr = c("5","20"), pos = c(261,162)
                              , what="draws" # to use prob, requires imputation using hk
                              )
@@ -442,13 +442,21 @@ out.weight.g_0509.fq <- fitqtl(sfon, pheno.col="weight.g_0509", qtl=qtl.weight.g
                                #, covar=sex.df
                                )
 
-# need to put in the covariate? doesn't seem to affect anything
-summary(out.weight.g_0509.fq)
+summary(out.weight.g_0509.fq) # need to put in the covariate? doesn't seem to affect anything
 
 # example with weight.g_0709
 qtl.weight.g_0709 <- makeqtl(sfon, chr=c("4","5"), pos = c(28.3, 198.5), what = "draws")
 out.weight.g_0709 <- fitqtl(sfon, pheno.col="weight.g_0709", qtl=qtl.weight.g_0709, formula=y~Q1+Q2)
 summary(out.weight.g_0709)
+
+# as above, but including the sex covariate (additive)
+qtl.weight.g_0709_sex <- makeqtl(sfon, chr=c("4","5"), pos = c(28.3, 198.5), what = "draws")
+out.weight.g_0709_sex <- fitqtl(sfon, pheno.col="weight.g_0709", qtl=qtl.weight.g_0709_sex
+                                , formula=y~Q1+Q2, covar=sex)
+summary(out.weight.g_0709_sex)
+
+
+
 
 # example to find pve from a single qtl
 qtl.weight.g_1109 <- makeqtl(sfon, chr=c("20"), pos = c(169), what = "draws")
