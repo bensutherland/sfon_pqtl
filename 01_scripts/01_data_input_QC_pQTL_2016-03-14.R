@@ -182,7 +182,7 @@ sfon$pheno$Fish.ID[which(indiv.miss.geno > 2000)]
 sfon <- calc.genoprob(sfon, step = 0, error.prob =0.0001) #hmm to calc prob of true underlying genos given data
 
 
-#####2A WHICH PHENOs REQ SEX AS COVARIATE?#####
+#####1J WHICH PHENOs REQ SEX AS COVARIATE?#####
 names(sfon$pheno)
 pheno.df <- data.frame(sfon$pheno[,-1]) #drop Fish.ID
 row.names(pheno.df) <- sfon$pheno[,1] #use Fish.ID as row.names
@@ -220,7 +220,7 @@ ph.no.cov <- which(pvals.pxs >= 0.2) # phenos NOT needing covariate
 ph.sex.sp <- c("fem.egg.diam","male.sperm.conc","male.sperm.diam")
 
 
-#####2B CORRELATION OF PHENOTYPES #####
+#####1K CORRELATION OF PHENOTYPES #####
 head(pheno.df)
 names(pheno.df)
 
@@ -228,6 +228,67 @@ cor(pheno.df[,c(1,4,7,12,15:20,24:27)], use = "pairwise")
 pairs(pheno.df[,c(1,4,7,12,15:20,24:27)])
 # it appears that only the weight/length and liver weight/hepatosomatic index are highly correlated
 
+######### Find phenotype averages and standard deviations ####
+names(sfon$pheno) # take 2:length(names(sfon$pheno))
+length(names(sfon$pheno))
+# find averages for the sexes
+sex.sp.avg.df <- aggregate(sfon$pheno[,2:34], list(sfon$pheno$sex), na.rm = T, FUN=mean)
+dim(sex.sp.avg.df)
+sex.sp.avg.df
+
+# and standard deviation
+sex.sp.sd.df <- aggregate(sfon$pheno[,2:34], list(sfon$pheno$sex), na.rm = T, FUN=sd)
+dim(sex.sp.sd.df)
+sex.sp.sd.df
+
+data <- rbind(sex.sp.avg.df, sex.sp.sd.df)
+row.names(data) <- c("avg.F","avg.M","sd.F","sd.M") 
+
+# because aggregate seems to not work with multiple values, will have to create a loop for that.
+test <- NULL
+# and length (sample sizes)
+for(i in 2:34) {
+  test <- aggregate(sfon$pheno[,i] ~ sfon$pheno$sex, FUN = length)
+  print(names(sfon$pheno)[i])
+  print(test)  
+}
+
+# To assign to object
+test = NULL
+test <- as.data.frame(c("temp", "temp"))
+for(i in 2:34) {
+  test <- cbind(test, aggregate(sfon$pheno[,i] ~ sfon$pheno$sex, FUN = length))
+  #print(names(sfon$pheno)[i])
+  #print(test)  
+}
+dim(test)
+
+test[1:2,1:10]
+
+sex.order <- test[1:2,2]
+
+subset.samplesizes <- cbind(sex.order, 
+                            test[, seq(3, ncol(test), by = 2)]
+)
+colnames(subset.samplesizes) <- c("Group.1", names(sfon$pheno)[-1])
+rownames(subset.samplesizes) <- c("n.fem", "n.mal")
+subset.samplesizes
+
+# Bring together all data
+dim(data)
+names(data)
+dim(subset.samplesizes)
+names(subset.samplesizes)
+
+avg.sd.n.df <- as.data.frame(rbind(data, subset.samplesizes))
+str(avg.sd.n.df)
+write.csv(x = t(avg.sd.n.df), file = "avg.sd.n.csv", quote = F)
+
+
+
+
+
+#######NOW GO TO PART 2 SCRIPT TO DO SCANONE PERM TESTS#######
 #export CLEANED INPUT DATA FOR SCANONE PERM TESTS #######
 save.image(file = "sfon_01_output.RData") # save out existing data so that it can be reloaded without running all again
-#######NOW GO TO PART 2 SCRIPT TO DO SCANONE PERM TESTS#######
+
