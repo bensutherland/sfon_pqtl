@@ -481,11 +481,31 @@ out.chr.osmo.delta <- fitqtl(sfon, pheno.col="osmo.delta", qtl=qtl.chr.osmo.delt
 summary(out.chr.osmo.delta)
 
 
-#### EFFECT SIZES #####
-aggregate(sfon$pheno$condit.fact_T1, by=list(sfon$geno[[16]]$data[,"118085"]), FUN=mean)
+#### 3I Effect sizes per mtype per sig marker/trait #####
+# import dataframe of important markers and chromosome
+# Collect the columns: phenotype; chr; and mname -- then put into a .csv
+sig_mname_chr_pheno.df <- as.data.frame(read.csv(file = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/sig_pheno_chr_mname_from_excel.csv", header = T))
+head(sig_mname_chr_pheno.df)
+sig_mname_chr_pheno.df[] <- lapply(sig_mname_chr_pheno.df, as.character) #convert the dataframe cols to char
+str(sig_mname_chr_pheno.df)
 
+# Use aggregate to calculate the mean per marker type per sig marker/trait combos
+phenotype=NULL
+mname=NULL
+chr=NULL
+for(i in 1:length(sig_mname_chr_pheno.df[,1])) {
+  mname=sig_mname_chr_pheno.df[i,"mname"]
+  chr=sig_mname_chr_pheno.df[i,"chr"]
+  phenotype=sig_mname_chr_pheno.df[i,"phenotype"]
+  print(c(mname,chr,phenotype))
+  print(aggregate(sfon$pheno[phenotype], by=list(sfon$geno[[chr]]$data[,mname]), FUN=mean, na.rm=T))
+}
 
-
+# in case want to test out, note that the na.rm=T is critical here
+# it is not clear why na.rm is critical, because sometimes works when there are NA values and sometimes doesn't
+aggregate(sfon$pheno$TCS_T1.T2, by=list(sfon$geno[[16]]$data[,"118085"]), FUN=mean
+          , na.rm=T
+          )
 
 
 ####### IDENTIFY ACTUAL GENOS - NEEDS WORK!! ######
