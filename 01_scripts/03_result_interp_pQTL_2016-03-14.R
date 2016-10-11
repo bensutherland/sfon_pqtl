@@ -507,6 +507,48 @@ aggregate(sfon$pheno$TCS_T1.T2, by=list(sfon$geno[[16]]$data[,"118085"]), FUN=me
           , na.rm=T
           )
 
+# as above, but also including sex in model when needed
+phenotype=NULL
+mname=NULL
+chr=NULL
+for(i in 1:length(sig_mname_chr_pheno.df[,1])) {
+  mname=sig_mname_chr_pheno.df[i,"mname"]
+  chr=sig_mname_chr_pheno.df[i,"chr"]
+  phenotype=sig_mname_chr_pheno.df[i,"phenotype"]
+  print(c(mname,chr,phenotype))
+  if (phenotype %in% names(ph.yes.cov)) {
+    print("sex included")
+    print(aggregate(sfon$pheno[phenotype], by=list(sfon$geno[[chr]]$data[,mname], sfon$pheno$sex), FUN=mean, na.rm=T))
+  } else if (phenotype %in% names(ph.no.cov)) {
+    print(aggregate(sfon$pheno[phenotype], by=list(sfon$geno[[chr]]$data[,mname]), FUN=mean, na.rm=T))
+  }
+}
+
+
+
+
+#example of if statemen t
+if (pheno %in% names(ph.yes.cov)) {
+  # use covariate if needed
+  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr, addcov=sex)
+  chr.scan.perm = scanone(sfon, method="hk", 
+                          pheno.col=pheno, chr=chr, addcov=sex,
+                          n.perm=num.perm, n.cluster = num.cluster 
+                          , verbose=T)
+  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
+  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
+} else {
+  # don't use covariate
+  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
+  chr.scan.perm = scanone(sfon, method="hk", 
+                          pheno.col=pheno, chr=chr, 
+                          n.perm=num.perm, n.cluster = num.cluster 
+                          , verbose=T)
+  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
+  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
+}
+
+
 
 ####### IDENTIFY ACTUAL GENOS - NEEDS WORK!! ######
 # this should all be correct but required manual back-calc from Rqtl to joinmap to haplotypes from STACKS
@@ -552,7 +594,7 @@ effectplot(sfon, mname1="66075",  mname2="Sex",
 #legend("topleft", legend = c("AC","BC"), fill = c("black","red"))
 
 
-######### FORMULA FOR PLOTTING LOD CURVES #######
+######### Appendix 1. FORMULA FOR PLOTTING LOD CURVES #######
 par(mfrow=c(1,1), mar= c(2,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 
 #find your LOD column (start counting after chr and pos)
@@ -581,8 +623,3 @@ plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
      xlab = "",
      bandcol="gray70")
 abline(h=summary(scanone.perms[,POI], 0.05), lty=1)
-
-
-###### REMAINING QUESTIONS ########
-###why is hep.som.ind so high for gw-sig ??
-# note: so is TCS_T2.T3
