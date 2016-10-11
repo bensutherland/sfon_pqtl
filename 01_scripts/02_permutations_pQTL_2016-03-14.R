@@ -11,10 +11,6 @@ install.packages("rlecuyer")
 require(rlecuyer) #random number generator in parallel
 require(plyr)
 
-##### is this package necessary ?####
-#install.packages("snow")
-#library(snow)
-
 # set working directory for the cluster computer
 setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 
