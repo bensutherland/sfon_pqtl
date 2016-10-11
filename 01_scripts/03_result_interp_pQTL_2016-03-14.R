@@ -236,10 +236,10 @@ sfon$geno[[5]]$data[1:5,1:5] # gives the genotype codes from the first five mark
 
 # as an example, check out a fully informative marker (with four distinct genotypes):
 par(mfrow=c(1,1))
-marker.count <- which(names(sfon$geno[[5]]$data[1,]) == "85980") #find a marker by name on chr 17
-effectplot(sfon, mname1="128012",  
+marker.count <- which(names(sfon$geno[[9]]$data[1,]) == "33699") #find a marker by name on chr 17
+effectplot(sfon, mname1="33699",  
            mname2="Sex",
-           mark1=sfon$geno[[5]]$data[,marker.count], 
+           mark1=sfon$geno[[9]]$data[,marker.count], 
            geno1=c("AG,AG","GA,AG","AG,AA","GA,AA"), #appropriate genos are added from stacks.markers.info.xlsx
            mark2=sex, geno2=c("F","M"), 
            pheno.col = "weight.g_0509", 
@@ -370,12 +370,16 @@ summary(out.ghr)
 ## Phenotypes not needing covariate sex ##
 # TCS_T1.T2
 qtl.chr.TCS_T1.T2 <- makeqtl(sfon, chr=c("9"), pos = c(184), what = "draws")
-out.chr.TCS_T1.T2 <- fitqtl(sfon, pheno.col="TCS_T1.T2", qtl=qtl.chr.TCS_T1.T2, formula=y~Q1)
+out.chr.TCS_T1.T2 <- fitqtl(sfon, pheno.col="TCS_T1.T2", qtl=qtl.chr.TCS_T1.T2, formula=y~Q1
+                            , get.ests = TRUE
+                            )
 summary(out.chr.TCS_T1.T2)
 
 # TCS_T2.T3
 qtl.chr.TCS_T2.T3 <- makeqtl(sfon, chr=c("3","9","36"), pos = c(35.7, 139, 31.4), what = "draws")
-out.chr.TCS_T2.T3 <- fitqtl(sfon, pheno.col="TCS_T2.T3", qtl=qtl.chr.TCS_T2.T3, formula=y~Q1+Q2+Q3)
+out.chr.TCS_T2.T3 <- fitqtl(sfon, pheno.col="TCS_T2.T3", qtl=qtl.chr.TCS_T2.T3, formula=y~Q1+Q2+Q3
+                            , get.ests = TRUE
+                            )
 summary(out.chr.TCS_T2.T3)
 
 # TCS_T1.T3
@@ -475,6 +479,13 @@ summary(out.chr.cort.delta)
 qtl.chr.osmo.delta <- makeqtl(sfon, chr=c("40"), pos = c(60.3), what = "draws")
 out.chr.osmo.delta <- fitqtl(sfon, pheno.col="osmo.delta", qtl=qtl.chr.osmo.delta, formula=y~Q1+sex, covar=sex.df)
 summary(out.chr.osmo.delta)
+
+
+#### EFFECT SIZES #####
+aggregate(sfon$pheno$condit.fact_T1, by=list(sfon$geno[[16]]$data[,"118085"]), FUN=mean)
+
+
+
 
 
 ####### IDENTIFY ACTUAL GENOS - NEEDS WORK!! ######
