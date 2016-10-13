@@ -526,28 +526,9 @@ for(i in 1:length(sig_mname_chr_pheno.df[,1])) {
 
 
 
-
-#example of if statemen t
-if (pheno %in% names(ph.yes.cov)) {
-  # use covariate if needed
-  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr, addcov=sex)
-  chr.scan.perm = scanone(sfon, method="hk", 
-                          pheno.col=pheno, chr=chr, addcov=sex,
-                          n.perm=num.perm, n.cluster = num.cluster 
-                          , verbose=T)
-  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
-  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
-} else {
-  # don't use covariate
-  chr.scan <- scanone(sfon, method = "hk", pheno.col=pheno, chr=chr)
-  chr.scan.perm = scanone(sfon, method="hk", 
-                          pheno.col=pheno, chr=chr, 
-                          n.perm=num.perm, n.cluster = num.cluster 
-                          , verbose=T)
-  chr.sig = c(chr.sig, summary(chr.scan.perm, chr.wide.pval))
-  scanone.mods[[paste(pheno, "_", chr, sep="")]] <- chr.scan
-}
-
+#Confirming Actual Genotypes New#
+sfon$geno[[4]]$data[,"7187"]
+sfon$pheno$Fish.ID
 
 
 ####### IDENTIFY ACTUAL GENOS - NEEDS WORK!! ######
