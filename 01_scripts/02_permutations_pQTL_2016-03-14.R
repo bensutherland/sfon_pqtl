@@ -18,8 +18,11 @@ setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 load("02_data/sfon_01_output.RData")
 
 # Set permutation variables (perm should be 1000):
-num.perm = 1000
+num.perm = 10000
 num.cluster = 20
+
+# Create sex variable
+sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
 
 ####### 2A Single QTL, no covariate #####
 # Create scanone object for phenos not requiring covariate (includes sex-specific phenos)
@@ -33,7 +36,6 @@ all.out.0.nocov.perm <- scanone(sfon, method="hk", pheno.col= c(names(ph.no.cov)
 
 ####### 2B SINGLE QTL, consider covariate #####
 # scanone (consider covariate)
-sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
 out.am <- scanone(sfon, method="hk", addcov=sex, 
                   pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
 ) # additive model
