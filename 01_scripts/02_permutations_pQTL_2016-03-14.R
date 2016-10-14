@@ -57,7 +57,6 @@ operm.im <- scanone(sfon, addcovar=sex, intcovar=sex, n.perm=num.perm,
 
 ## 2C Chromosome-wide scanone and permutations ####
 ## includes if/else statement to use the covariate of sex when required
-
 # select your phenotypes and chromosomes
 all.phenos <- c(names(ph.no.cov), ph.sex.sp, names(ph.yes.cov))
 selected.chrs <- 1:42
