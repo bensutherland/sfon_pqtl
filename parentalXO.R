@@ -451,29 +451,25 @@ indiv <- c(1:10)
 cum.mxoloc.list <- list(NULL)
 cum.dxoloc.list <- list(NULL)
 recalc.chr.length <- NULL
-cum.recalc.chr.length <- list(NULL) #FIXING
-#cum.recalc.chr.length <- NULL
-cum.recalc.chr.length.test <- NULL
+cum.recalc.chr.length <- NULL
 
 for(i in chr) {
   parentalXO(sfqtl, chr = i, ind = indiv)
     cum.mxoloc.list[[i]] <- mxoloc.per.chr
     cum.dxoloc.list[[i]] <- dxoloc.per.chr
     cum.recalc.chr.length[[i]] <- recalc.chr.length
-    cum.recalc.chr.length.test[[i]] <- recalc.chr.length
     #print(cum.recalc.chr.length[i])
 }
 
 # Outputs
 cum.mxoloc.list
 cum.dxoloc.list
-cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final one is the one that is plotted
-####PROBLEM IS HERE###
-cum.recalc.chr.length.test #  TRY REPLACING BELOW WITH THIS VECTOR
+
+cum.recalc.chr.length
 
 
 
-# Because my P1 = Male instead of standard (= female), mxoloc = P1..
+# NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
 #### 2. COUNT crossovers in multiple chromosomes ####
@@ -511,9 +507,8 @@ for(i in chr) {
   indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
   print(c("**Treating Sample:", indiv.nums), quote=F)
   
-  #### HERE IS THE PROBLEM ###
-  #XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[[(i)]][length(cum.recalc.chr.length[[(i)]])]) # ORIGINAL (WORKS)
-  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length.test[(i)]) # experimental
+  # For each chromosome, record the total length
+  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[(i)]) # experimental
   print(c("***XO.tot.len", XO.tot.leng), quote=F)  
   
   # extract this chromosome loop's chromosome length
