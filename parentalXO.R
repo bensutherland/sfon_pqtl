@@ -1,3 +1,11 @@
+
+# Install packages
+require(qtl)
+
+# Set NULL for parentalXO
+recalc.chr.length <- NULL
+
+
 # An adaptation of the plotGeno() function in order to obtain the parental crossover locations
 
 parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
@@ -95,7 +103,8 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       
       print("NEXT IS MAP LENGTH")
       print(max(map))
-      recalc.chr.length <<- c(recalc.chr.length, max(map))
+      #recalc.chr.length <<- c(recalc.chr.length, max(map)) # ORIGINAL (WORKS)
+      recalc.chr.length <<- max(map) # NEW ATTEMPT
       
       ## BEN EDIT FINISH ##
     }
@@ -429,28 +438,40 @@ parentalXO(sfqtl, chr = 7, ind = c(1:10))
 
 # User variables
 # For running 'all'
-indiv <- 1:nind(sfqtl)
-chr <- 1:nchr(sfqtl)
-chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) # performing for only metacentrics
+#indiv <- 1:nind(sfqtl)
+#chr <- 1:nchr(sfqtl)
+#chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) # performing for only metacentrics
 # indiv <- 1:nind(sfqtl) # still in testing phase
+
+# testing user variables
+chr <- c(1:3)
+indiv <- c(1:10)
 
 # NULL variables
 cum.mxoloc.list <- list(NULL)
 cum.dxoloc.list <- list(NULL)
 recalc.chr.length <- NULL
-cum.recalc.chr.length <- list(NULL)
+cum.recalc.chr.length <- list(NULL) #FIXING
+#cum.recalc.chr.length <- NULL
+cum.recalc.chr.length.test <- NULL
 
 for(i in chr) {
   parentalXO(sfqtl, chr = i, ind = indiv)
     cum.mxoloc.list[[i]] <- mxoloc.per.chr
     cum.dxoloc.list[[i]] <- dxoloc.per.chr
     cum.recalc.chr.length[[i]] <- recalc.chr.length
+    cum.recalc.chr.length.test[[i]] <- recalc.chr.length
+    #print(cum.recalc.chr.length[i])
 }
 
 # Outputs
 cum.mxoloc.list
 cum.dxoloc.list
 cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final one is the one that is plotted
+####PROBLEM IS HERE###
+cum.recalc.chr.length.test #  TRY REPLACING BELOW WITH THIS VECTOR
+
+
 
 # Because my P1 = Male instead of standard (= female), mxoloc = P1..
 
@@ -459,7 +480,7 @@ cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final
 # Uses local extension of distance for detecting double crossovers
 
 # Choose data variable using either cum.mxoloc.list (FATHER) or cum.dxoloc.list (MOTHER)
-#data <- cum.dxoloc.list
+data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
 
 # none of this is working right, try to subset earlier...
@@ -470,69 +491,78 @@ cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final
 # data <- cum.mxoloc.list[-metacentrics.sfqtl] #acrocentric, paternal
 
 
-# loop variables
-lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
-indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
-XO.tot.leng <- NULL ; XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
-
 # user variables
+dist <- 100 # distance of 100 cM added to each side
 chr <- 1:length(data) # for all
 #chr <- c(9,18,1,15,4,7,11,5)
-dist <- 100 # distance of 100 cM added to each side
+
+# NULL variables
+lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
+indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
+XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 
 # Create a subset piece from the total list per chromosome
 for(i in chr) {
-  test <- data[[i]] # temporary to keep below
-  print(c("segment", test))
+  test <- data[[i]] # take out data from one chromosome
+  print(c("*Treating chromosome", chr[i]), quote = F)
+  print(test)
   
-  # For each chr, loop to count number of XO
-  indiv.nums <- unique(test[,1]) # identify the unique sample names
-  print(indiv.nums)
-  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[[(i)]][length(cum.recalc.chr.length[[(i)]])])
-  print("LENGTH OF CHR OF INTEREST")
-  print(XO.tot.leng) # use this below to find the relative position of the XO across the CHR
-  print("THIS ROUND THE CHR IS")
-  print(XO.tot.leng[i])
+  # For each chromosome, count the number of XO per individual
+  indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
+  print(c("**Treating Sample:", indiv.nums), quote=F)
+  
+  #### HERE IS THE PROBLEM ###
+  #XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[[(i)]][length(cum.recalc.chr.length[[(i)]])]) # ORIGINAL (WORKS)
+  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length.test[(i)]) # experimental
+  print(c("***XO.tot.len", XO.tot.leng), quote=F)  
+  
+  # extract this chromosome loop's chromosome length
+  current.chr.leng <- NULL
   current.chr.leng <- XO.tot.leng[i]
-  
-  for(i in indiv.nums) {
-    # find row containing the indiv of interest (per loop)
-    indiv.row <- which(test[,1] == (i))
-    print(c("indiv.row",indiv.row))
+  print(c("THIS ROUND THE CHR IS", XO.tot.leng[i]))
     
-    # each row of the indiv of interest
-    for(loc in indiv.row) {
-      print(test[(loc),2])
-      lower <- test[(loc),2] - dist
-      upper <- test[(loc),2] + dist
-      print(c(lower, upper))
+    # Per chromosome, check each unique indiv
+    for(i in indiv.nums) {
+      indiv.row <- which(test[,1] == (i)) # find row(s) for the indiv of interest (per loop)
+      print(c("indiv.row",indiv.row))
       
-      # find the rows of the indiv of interest within the range
-      test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
-      print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
+      # Per unique indiv, check each XO
+      for(loc in indiv.row) {
       
-      # How many other XO for this indiv, chr are within range of this loop's XO 
-      print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2)
+        print(test[(loc),2])
+        lower <- test[(loc),2] - dist
+        upper <- test[(loc),2] + dist
+        print(c(lower, upper))
       
-      # Add the odd (1) or even (0) surrounding XO (within range) value to this loop's XO
-      #odd.even <- length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2
-      odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
-      print(c("odd.even", odd.even))
+        # TRUE for each XO in range
+        test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
+        print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
       
-      # With an odd number (1), add a XO to the counter; if even (0) do not add
-      if(odd.even == 0) {
-        print("even")
-        counter <- counter
-      } else {
-        print("odd")
-        print("THIS CHR TOTAL LENGTH IS")
-        print(i)
-        print(XO.tot.leng[i])
-        print("HEY LOOK HERE, IS THIS THE RIGHT LENGTH?")
-        print(current.chr.leng)
-        XO.spot <<- c(XO.spot, print(test[(loc),2]))
-        CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
-        counter <- counter + 1 }
+        # Number of XO within the range
+        print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs in area")) 
+        
+        # 0 if EVEN, 1 if ODD
+        print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2) 
+      
+        # True to add 1 to counter
+        odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
+        print(c("odd.even", odd.even))
+        
+        # If odd number (1), add a XO to the counter; if even (0) do not add
+        if(odd.even == 0) {
+          print("even")
+          counter <- counter
+        } else {
+          print("odd")
+          
+          # Collect the location of this crossover
+          XO.spot <<- c(XO.spot, print(test[(loc),2]))
+          
+          # Collect the total chromosome length for this crossover
+          CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
+          print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
+          counter <- counter + 1 
+        }
       print(c("counter", counter))
     }
   }
@@ -540,7 +570,10 @@ for(i in chr) {
 
 counter
 
-par(mfrow=c(2,1))
+
+#### PLOTTING THE MALE AND FEMALE GRAPHS #####
+
+par(mfrow=c(1,1))
 # maternal
 hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
 text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
