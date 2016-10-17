@@ -1,5 +1,7 @@
 # An adaptation of the plotGeno() function in order to obtain the parental crossover locations
 
+# Produces mxoloc.per.chr and dxoloc.per.chr for P1 and P2, respectively
+
 parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
                         cutoff = 4, min.sep = 2, cex = 1.2, ...) 
 {
@@ -412,21 +414,26 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 
 
   
-## EXAMPLES OF USE OF FUNCTION ##  
+## Example single query use of function: 
+# note, still need to initially run calc.errorlod on the cross object
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
-
 # this will produce an object 'mxoloc.per.chr' and 'dxoloc.per.chr' that is a df with ind and loc
 mxoloc.per.chr
 dxoloc.per.chr
 
-# For loop to capture each chromosome in a list
-cum.mxoloc.list <- list(cum.mxoloc)
-cum.dxoloc.list <- list(cum.dxoloc)
-for(i in 1:42) {
-  parentalXO(sfqtl, chr = i, ind = c(1:10))
+
+##### Capture results from each chromosome in a list ####
+# Set lists and variables
+cum.mxoloc.list <- NULL
+cum.dxoloc.list <- NULL
+indivs <- 1:10
+chrs <- 1:42
+
+# Loop
+for(i in chrs) {
+  parentalXO(sfqtl, chr = i, ind = indivs)
   cum.mxoloc.list[[i]] <- mxoloc.per.chr
   cum.dxoloc.list[[i]] <- dxoloc.per.chr
-  #cum.mxoloc <- rbind(cum.mxoloc, c("chr",i), mxoloc.per.chr) # continuous dataframe instead of list
 }
 
 # Check
@@ -434,29 +441,31 @@ cum.mxoloc.list
 cum.dxoloc.list
 
 
-# Example with capture output
-#capture.output(parentalXO(sfqtl, chr = 7, ind = c(1:10)), file = "test.txt")
-
-# Because my P1 = Male instead of standard (= female), mxoloc = P1..
-
-# Keep the goal in mind, find a way to only include crossover if they don't 
-# have a second crossover right beside.
-
-
+#### setups for attempts ####
 test <- mxoloc.per.chr
 test.list.single <- list(mxoloc.per.chr)
 test.list <- cum.mxoloc.list
 
-# currently only dealing with double crossovers...
 
+
+
+####### NOTES ######
+# 1) Because my P1 = Male instead of standard (= female), mxoloc = P1..
+
+
+
+### ATTEMPT 1, FAIL #####
+## Only count crossovers if it does not have a second crossover right beside
+# currently only dealing with double crossovers...
 unique(test[,1]) # find out what individuals are there
 
 # For loop within one record of the list:
 counter <- 0 # counter will keep track of how many crossovers have > x distance
+index.pos = NULL
 for(i in unique(test[,1])) {
   index.pos <<- which(test[,1] == (i))
-  print(length(index.pos))
-  print(index.pos)
+  print(paste(c("Number of crossovers in this ind/chr =", length(index.pos))), quote=F)
+  # print(index.pos)
   print(test[index.pos[2],2] - test[index.pos[1],2])
   
   if(test[index.pos[2],2] - test[index.pos[1],2] > 50){
@@ -467,9 +476,18 @@ for(i in unique(test[,1])) {
 
 counter
 
+# This preceding loop fails if there is only a single crossover, will have to add 
+#an if loop to only perform the calculation if there is a second crossover..
+# But it will also fail if there are more than two. 
+# this is probably not the final one that was used.
+#### END ATTEMPT 1 (fail) ####
+
+
+### ATTEMPT 2 Works, but only for a single chromosome #####
+#TODO: Variables for distance, input datafile
 
 # Local extension of distance for detecting double crossovers (single chr)
-# user defined variables
+# Define variables
 counter <- 0 # to count XO
 indiv.nums <- unique(test[,1]) # identify the samples
 
@@ -484,14 +502,14 @@ for(i in indiv.nums) {
   indiv.row <- which(test[,1] == (i))
   print(indiv.row)
   
-  # each row of the indiv of interest
+  # Per row of the indiv of interest
   for(loc in indiv.row){
     print(test[(loc),2])
     lower <- test[(loc),2] - 100
     upper <- test[(loc),2] + 100
     print(c(lower, upper))
     
-    # find the rows of the indiv of interest within the range
+    # find the number of rows of the indiv of interest within the range
     test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
     
     # How many other XO for this indiv, chr are within range of this loop's XO 
@@ -513,44 +531,9 @@ for(i in indiv.nums) {
 }
 
 counter
-### Now just add an if statement to add a point to the counter if it is odd.
-
-#TODO: Variables for distance, input datafile
 
 
-
-
-
-
-
-## LEFTOVER
-print(length(index.pos))
-  print(index.pos)
-  print(test[index.pos[2],2] - test[index.pos[1],2])
-  
-  if(test[index.pos[2],2] - test[index.pos[1],2] > 50){
-    print(c("keep", i))
-    counter <- counter+1
-  }
-}
-
-counter
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+##### ATTEMPT 3A #####
 # Test with a list but only with the single test above...
 counter <- 0 # counter will keep track of how many crossovers have > x distance
 for(j in 1){
@@ -572,9 +555,7 @@ for(j in 1){
 
 counter
 
-
-
-
+##### ATTEMPT 3B (not a window attempt, only odd/even and distance) #####
 ## Now try with a list slice that has an odd number (e.g. 1) of crossovers
 counter <- 0 # counter will keep track of how many crossovers have > x distance
 for(j in 1){
@@ -586,8 +567,8 @@ for(j in 1){
     print(length(index.pos))
     
     if (length(index.pos)%%2 == 0){
-      print("even")
-      else {
+      print("even")}
+    else {
         print("odd")
       }
     }
@@ -600,16 +581,10 @@ for(j in 1){
       counter <- counter+1
     }
   }
-}
 
 counter
 
-
-
-
-
-
-### FAILED ATTEMPTS ###
+##### FAILED ATTEMPTS ######
 # For loop with entire list
 current.piece <- NULL
 counter <- 0
