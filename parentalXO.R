@@ -420,38 +420,27 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 # dxoloc.per.chr
 
 
-
-########## End formula #############
-# Testing on single
-# obtain parentalXO for chr 7, individuals 1:10
-
-recalc.chr.length <- NULL
+# Testing using a single round (chr 7, ind 1:10):
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
-recalc.chr.length
-
-
-
 
 #### OBTAIN parentalXO in all chromosomes ####
 
 # User variables
-indiv <- c(1:10)
+indiv <- 1:10
+chr <- 1:nchr(sfqtl)
 # indiv <- 1:nind(sfqtl) # still in testing phase
 
-# Empty lists
+# NULL variables
 cum.mxoloc.list <- list(NULL)
 cum.dxoloc.list <- list(NULL)
+recalc.chr.length <- NULL
 cum.recalc.chr.length <- list(NULL)
 
-for(i in 1:nchr(object = sfqtl)) {
-  parentalXO(sfqtl, chr = i
-             , ind = indiv
-  )
-  cum.mxoloc.list[[i]] <- mxoloc.per.chr
-  cum.dxoloc.list[[i]] <- dxoloc.per.chr
-  
-  cum.recalc.chr.length[[i]] <- recalc.chr.length
-  #cum.mxoloc <- rbind(cum.mxoloc, c("chr",i), mxoloc.per.chr) # continuous dataframe instead of list
+for(i in chr) {
+  parentalXO(sfqtl, chr = i, ind = indiv)
+    cum.mxoloc.list[[i]] <- mxoloc.per.chr
+    cum.dxoloc.list[[i]] <- dxoloc.per.chr
+    cum.recalc.chr.length[[i]] <- recalc.chr.length
 }
 
 # Outputs
@@ -459,38 +448,29 @@ cum.mxoloc.list
 cum.dxoloc.list
 cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final one is the one that is plotted
 
-
 # Because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
-######## Multiple chromosome ####
-# Local extension of distance for detecting double crossovers (multi chr)
+#### COUNT crossovers in multiple chromosomes ####
+# Uses local extension of distance for detecting double crossovers
 
-# choose either cum.mxoloc.list (FATHER) or cum.dxoloc.list
-data <- NULL
+# Choose data variable using either cum.mxoloc.list (FATHER) or cum.dxoloc.list (MOTHER)
 #data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
-# data <- list(cum.mxoloc.list[[33]]) #just one chr
-# data[[1]] <- list(cum.dxoloc.list[[33]]) #just one chr
-# data[[2]] <- list(cum.dxoloc.list[[34]]) #just one chr
 
-
-# START #
 # loop variables
 lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
 indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
 chr <- length(data) ; XO.tot.leng <- NULL ; XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
+dist <- 100 # distance of 100 cM added to each side
 
-dist <- 100
-
-
-# create a piece for each chromosome
+# Create a subset piece from the total list per chromosome
 for(i in 1:chr) {
   test <- data[[i]] # temporary to keep below
   print(c("segment", test))
   
   # For each chr, loop to count number of XO
-  indiv.nums <- unique(test[,1]) # identify the samples
+  indiv.nums <- unique(test[,1]) # identify the unique sample names
   print(indiv.nums)
   XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[[(i)]][length(cum.recalc.chr.length[[(i)]])])
   print("LENGTH OF CHR OF INTEREST")
