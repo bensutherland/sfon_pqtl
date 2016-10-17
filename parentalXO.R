@@ -1,7 +1,5 @@
 # An adaptation of the plotGeno() function in order to obtain the parental crossover locations
 
-# Produces mxoloc.per.chr and dxoloc.per.chr for P1 and P2, respectively
-
 parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
                         cutoff = 4, min.sep = 2, cex = 1.2, ...) 
 {
@@ -94,6 +92,11 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       print("dxoloc")
       print(dxoloc)
       dxoloc.per.chr <<- dxoloc
+      
+      print("NEXT IS MAP LENGTH")
+      print(max(map))
+      recalc.chr.length <<- c(recalc.chr.length, max(map))
+      
       ## BEN EDIT FINISH ##
     }
   }
@@ -410,197 +413,151 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
   }
   invisible()
 }
-  
+
+# produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr' 
+# a dataframe with ind(ividual) and loc(ation))
+# mxoloc.per.chr
+# dxoloc.per.chr
 
 
-  
-## Example single query use of function: 
-# note, still need to initially run calc.errorlod on the cross object
+
+########## End formula #############
+# Testing on single
+# obtain parentalXO for chr 7, individuals 1:10
+
+recalc.chr.length <- NULL
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
-# this will produce an object 'mxoloc.per.chr' and 'dxoloc.per.chr' that is a df with ind and loc
-mxoloc.per.chr
-dxoloc.per.chr
+recalc.chr.length
 
 
-##### Capture results from each chromosome in a list ####
-# Set lists and variables
-cum.mxoloc.list <- NULL
-cum.dxoloc.list <- NULL
-indivs <- 1:10
-chrs <- 1:42
 
-# Loop
-for(i in chrs) {
-  parentalXO(sfqtl, chr = i, ind = indivs)
+
+#### OBTAIN parentalXO in all chromosomes ####
+
+# User variables
+indiv <- c(1:10)
+# indiv <- 1:nind(sfqtl) # still in testing phase
+
+# Empty lists
+cum.mxoloc.list <- list(NULL)
+cum.dxoloc.list <- list(NULL)
+cum.recalc.chr.length <- list(NULL)
+
+for(i in 1:nchr(object = sfqtl)) {
+  parentalXO(sfqtl, chr = i
+             , ind = indiv
+  )
   cum.mxoloc.list[[i]] <- mxoloc.per.chr
   cum.dxoloc.list[[i]] <- dxoloc.per.chr
+  
+  cum.recalc.chr.length[[i]] <- recalc.chr.length
+  #cum.mxoloc <- rbind(cum.mxoloc, c("chr",i), mxoloc.per.chr) # continuous dataframe instead of list
 }
 
-# Check
+# Outputs
 cum.mxoloc.list
 cum.dxoloc.list
+cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final one is the one that is plotted
 
 
-#### setups for attempts ####
-test <- mxoloc.per.chr
-test.list.single <- list(mxoloc.per.chr)
-test.list <- cum.mxoloc.list
+# Because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
+######## Multiple chromosome ####
+# Local extension of distance for detecting double crossovers (multi chr)
+
+# choose either cum.mxoloc.list (FATHER) or cum.dxoloc.list
+data <- NULL
+#data <- cum.dxoloc.list
+#data <- cum.mxoloc.list
+# data <- list(cum.mxoloc.list[[33]]) #just one chr
+# data[[1]] <- list(cum.dxoloc.list[[33]]) #just one chr
+# data[[2]] <- list(cum.dxoloc.list[[34]]) #just one chr
 
 
-####### NOTES ######
-# 1) Because my P1 = Male instead of standard (= female), mxoloc = P1..
-
-
-
-### ATTEMPT 1, FAIL #####
-## Only count crossovers if it does not have a second crossover right beside
-# currently only dealing with double crossovers...
-unique(test[,1]) # find out what individuals are there
-
-# For loop within one record of the list:
-counter <- 0 # counter will keep track of how many crossovers have > x distance
-index.pos = NULL
-for(i in unique(test[,1])) {
-  index.pos <<- which(test[,1] == (i))
-  print(paste(c("Number of crossovers in this ind/chr =", length(index.pos))), quote=F)
-  # print(index.pos)
-  print(test[index.pos[2],2] - test[index.pos[1],2])
-  
-  if(test[index.pos[2],2] - test[index.pos[1],2] > 50){
-    print(c("keep", i))
-    counter <- counter+1
-  }
-}
-
-counter
-
-# This preceding loop fails if there is only a single crossover, will have to add 
-#an if loop to only perform the calculation if there is a second crossover..
-# But it will also fail if there are more than two. 
-# this is probably not the final one that was used.
-#### END ATTEMPT 1 (fail) ####
-
-
-### ATTEMPT 2 Works, but only for a single chromosome #####
-#TODO: Variables for distance, input datafile
-
-# Local extension of distance for detecting double crossovers (single chr)
-# Define variables
-counter <- 0 # to count XO
-indiv.nums <- unique(test[,1]) # identify the samples
-
+# START #
 # loop variables
-lower <- NULL
-upper <- NULL
-odd.even <- NULL
+lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
+indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
+chr <- length(data) ; XO.tot.leng <- NULL ; XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 
-# Loop to count number of XO
-for(i in indiv.nums) {
-  # find row containing the indiv of interest (per loop)
-  indiv.row <- which(test[,1] == (i))
-  print(indiv.row)
+dist <- 100
+
+
+# create a piece for each chromosome
+for(i in 1:chr) {
+  test <- data[[i]] # temporary to keep below
+  print(c("segment", test))
   
-  # Per row of the indiv of interest
-  for(loc in indiv.row){
-    print(test[(loc),2])
-    lower <- test[(loc),2] - 100
-    upper <- test[(loc),2] + 100
-    print(c(lower, upper))
+  # For each chr, loop to count number of XO
+  indiv.nums <- unique(test[,1]) # identify the samples
+  print(indiv.nums)
+  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[[(i)]][length(cum.recalc.chr.length[[(i)]])])
+  print("LENGTH OF CHR OF INTEREST")
+  print(XO.tot.leng) # use this below to find the relative position of the XO across the CHR
+  print("THIS ROUND THE CHR IS")
+  print(XO.tot.leng[i])
+  current.chr.leng <- XO.tot.leng[i]
+  
+  for(i in indiv.nums) {
+    # find row containing the indiv of interest (per loop)
+    indiv.row <- which(test[,1] == (i))
+    print(c("indiv.row",indiv.row))
     
-    # find the number of rows of the indiv of interest within the range
-    test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
-    
-    # How many other XO for this indiv, chr are within range of this loop's XO 
-    print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2)
-    
-    # Add the odd (1) or even (0) surrounding XO (within range) value to this loop's XO
-    odd.even <- length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2
-    print(c("odd.even", odd.even))
-    
-    # With an odd number (1), add a XO to the counter; if even (0) do not add
+    # each row of the indiv of interest
+    for(loc in indiv.row) {
+      print(test[(loc),2])
+      lower <- test[(loc),2] - dist
+      upper <- test[(loc),2] + dist
+      print(c(lower, upper))
+      
+      # find the rows of the indiv of interest within the range
+      test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
+      print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
+      
+      # How many other XO for this indiv, chr are within range of this loop's XO 
+      print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2)
+      
+      # Add the odd (1) or even (0) surrounding XO (within range) value to this loop's XO
+      #odd.even <- length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2
+      odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
+      print(c("odd.even", odd.even))
+      
+      # With an odd number (1), add a XO to the counter; if even (0) do not add
       if(odd.even == 0) {
         print("even")
         counter <- counter
       } else {
         print("odd")
-        counter <- counter + 1
-      }
-    }
-}
-
-counter
-
-
-##### ATTEMPT 3A #####
-# Test with a list but only with the single test above...
-counter <- 0 # counter will keep track of how many crossovers have > x distance
-for(j in 1){
-  current.piece <- test.list.single[[1]]
-  #print(current.piece)
-
-  for(i in unique(current.piece[,1])) {
-    index.pos <<- which(current.piece[,1] == (i))
-    print(length(index.pos))
-    print(index.pos)
-    print(current.piece[index.pos[2],2] - current.piece[index.pos[1],2])
-    
-    if(current.piece[index.pos[2],2] - current.piece[index.pos[1],2] > 50){
-      print(c("keep", i))
-      counter <- counter+1
+        print("THIS CHR TOTAL LENGTH IS")
+        print(i)
+        print(XO.tot.leng[i])
+        print("HEY LOOK HERE, IS THIS THE RIGHT LENGTH?")
+        print(current.chr.leng)
+        XO.spot <<- c(XO.spot, print(test[(loc),2]))
+        CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
+        counter <- counter + 1 }
+      print(c("counter", counter))
     }
   }
 }
 
 counter
 
-##### ATTEMPT 3B (not a window attempt, only odd/even and distance) #####
-## Now try with a list slice that has an odd number (e.g. 1) of crossovers
-counter <- 0 # counter will keep track of how many crossovers have > x distance
-for(j in 1){
-  current.piece <- test.list[[(j)]]
-  #print(current.piece)
-  
-  for(i in unique(current.piece[,1])) {
-    index.pos <<- which(current.piece[,1] == (i))
-    print(length(index.pos))
-    
-    if (length(index.pos)%%2 == 0){
-      print("even")}
-    else {
-        print("odd")
-      }
-    }
-    
-    #print(index.pos)
-    #print(current.piece[index.pos[2],2] - current.piece[index.pos[1],2])
-    
-    if(current.piece[index.pos[2],2] - current.piece[index.pos[1],2] > 50){
-      print(c("keep", i))
-      counter <- counter+1
-    }
-  }
+par(mfrow=c(2,1))
+# maternal
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
+text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
 
-counter
+# paternal
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
+text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
 
-##### FAILED ATTEMPTS ######
-# For loop with entire list
-current.piece <- NULL
-counter <- 0
-for(i in 1:42){
-  current.piece <- test.list.single[[i]]
-  for(j in unique(current.piece[,1])) {
-    index.pos <<- which(current.piece[,1] == (i))
-    print(length(index.pos))
-    print(index.pos)
-    print(current.piece[index.pos[2],2] - current.piece[index.pos[1],2])
-    
-    if(current.piece[index.pos[2],2] - current.piece[index.pos[1],2] > 50){
-      print(c("keep", i))
-      counter <- counter+1
-    }
-  }
-}
+
+
+
+### Plot the relative position of the true XOs
+hist(XO.spot.relative, xlab = "Relative position of XO (%)", main = "")
+text(x=80, y=20, labels = paste("n =", length(XO.spot.relative), "XO") )
 
 
