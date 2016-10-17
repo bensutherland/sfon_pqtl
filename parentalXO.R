@@ -423,11 +423,15 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 # Testing using a single round (chr 7, ind 1:10):
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
 
-#### OBTAIN parentalXO in all chromosomes ####
+
+
+#### 1. OBTAIN parentalXO in all chromosomes ####
 
 # User variables
-indiv <- 1:10
+# For running 'all'
+indiv <- 1:nind(sfqtl)
 chr <- 1:nchr(sfqtl)
+chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) # performing for only metacentrics
 # indiv <- 1:nind(sfqtl) # still in testing phase
 
 # NULL variables
@@ -451,21 +455,33 @@ cum.recalc.chr.length # Note: not sure why I get multiple numbers, but the final
 # Because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
-#### COUNT crossovers in multiple chromosomes ####
+#### 2. COUNT crossovers in multiple chromosomes ####
 # Uses local extension of distance for detecting double crossovers
 
 # Choose data variable using either cum.mxoloc.list (FATHER) or cum.dxoloc.list (MOTHER)
 #data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
 
+# none of this is working right, try to subset earlier...
+# metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5)
+# data <- cum.dxoloc.list[metacentrics.sfqtl] #metacentric, maternal
+# data <- cum.mxoloc.list[metacentrics.sfqtl] #metacentric, paternal
+# data <- cum.dxoloc.list[-metacentrics.sfqtl] #acrocentric, maternal
+# data <- cum.mxoloc.list[-metacentrics.sfqtl] #acrocentric, paternal
+
+
 # loop variables
 lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
 indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
-chr <- length(data) ; XO.tot.leng <- NULL ; XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
+XO.tot.leng <- NULL ; XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
+
+# user variables
+chr <- 1:length(data) # for all
+#chr <- c(9,18,1,15,4,7,11,5)
 dist <- 100 # distance of 100 cM added to each side
 
 # Create a subset piece from the total list per chromosome
-for(i in 1:chr) {
+for(i in chr) {
   test <- data[[i]] # temporary to keep below
   print(c("segment", test))
   
@@ -532,12 +548,3 @@ text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
 # paternal
 hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
 text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
-
-
-
-
-### Plot the relative position of the true XOs
-hist(XO.spot.relative, xlab = "Relative position of XO (%)", main = "")
-text(x=80, y=20, labels = paste("n =", length(XO.spot.relative), "XO") )
-
-
