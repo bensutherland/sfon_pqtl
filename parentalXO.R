@@ -447,6 +447,7 @@ parentalXO(sfqtl, chr = 7, ind = c(1:10))
 chr <- c(1:3)
 indiv <- c(1:10)
 
+
 # NULL variables
 cum.mxoloc.list <- list(NULL)
 cum.dxoloc.list <- list(NULL)
@@ -490,6 +491,8 @@ data <- cum.dxoloc.list
 # user variables
 dist <- 100 # distance of 100 cM added to each side
 chr <- 1:length(data) # for all
+## HERE IS A PROBLEM ##
+
 #chr <- c(9,18,1,15,4,7,11,5)
 
 # NULL variables
@@ -555,7 +558,7 @@ for(i in chr) {
           
           # Collect the total chromosome length for this crossover
           CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
-          print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
+          #print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
           counter <- counter + 1 
         }
       print(c("counter", counter))
@@ -565,6 +568,10 @@ for(i in chr) {
 
 counter
 
+
+# note that currently if all of the chromosomes aren't consecutive,
+# there will be some empty chromosomes in the results, but 
+# it should not negatively effect the data
 
 #### PLOTTING THE MALE AND FEMALE GRAPHS #####
 
