@@ -1,10 +1,15 @@
+# Count crossovers controlling for likely false double crossovers
+# B. Sutherland, labo Bernatchez 2016-10-17
+# v0.1
 
 # Install packages
+#install("qtl")
 require(qtl)
+
+##### 0. Create formula #####
 
 # Set NULL for parentalXO
 recalc.chr.length <- NULL
-
 
 # An adaptation of the plotGeno() function in order to obtain the parental crossover locations
 
@@ -423,11 +428,9 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
   invisible()
 }
 
-# produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr' 
-# a dataframe with ind(ividual) and loc(ation))
+# This produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr', a df w/ ind and loc
 # mxoloc.per.chr
 # dxoloc.per.chr
-
 
 # Testing using a single round (chr 7, ind 1:10):
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
@@ -436,23 +439,19 @@ parentalXO(sfqtl, chr = 7, ind = c(1:10))
 
 #### 1. OBTAIN parentalXO in all chromosomes ####
 
-# User variables
-# For running 'all'
-#indiv <- 1:nind(sfqtl)
-#chr <- 1:nchr(sfqtl)
-#chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) # performing for only metacentrics
-# indiv <- 1:nind(sfqtl) # still in testing phase
+# Select which chromosomes to include
+#indiv <- 1:nind(sfqtl) # all individuals (experimental/unconfirmed)
+#chr <- 1:nchr(sfqtl) # all chromosomes
+#chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) #only metacentrics
+#chr <- acrocentrics.sfqtl <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
+#chr <- sex.chrom <- 22
+#chr <- non.sex.chrom <- c(1:21,23:42)
 
-# testing user variables
-chr <- c(1:3)
-indiv <- c(1:10)
-
+#chr <- c(1:3)
+#indiv <- c(1:10)
 
 # NULL variables
-cum.mxoloc.list <- list(NULL)
-cum.dxoloc.list <- list(NULL)
-recalc.chr.length <- NULL
-cum.recalc.chr.length <- NULL
+cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL ; cum.recalc.chr.length <- NULL
 
 for(i in chr) {
   parentalXO(sfqtl, chr = i, ind = indiv)
@@ -469,7 +468,6 @@ cum.dxoloc.list
 cum.recalc.chr.length
 
 
-
 # NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
@@ -480,20 +478,9 @@ cum.recalc.chr.length
 data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
 
-# none of this is working right, try to subset earlier...
-# metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5)
-# data <- cum.dxoloc.list[metacentrics.sfqtl] #metacentric, maternal
-# data <- cum.mxoloc.list[metacentrics.sfqtl] #metacentric, paternal
-# data <- cum.dxoloc.list[-metacentrics.sfqtl] #acrocentric, maternal
-# data <- cum.mxoloc.list[-metacentrics.sfqtl] #acrocentric, paternal
-
-
 # user variables
 dist <- 100 # distance of 100 cM added to each side
 chr <- 1:length(data) # for all
-## HERE IS A PROBLEM ##
-
-#chr <- c(9,18,1,15,4,7,11,5)
 
 # NULL variables
 lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
@@ -570,10 +557,10 @@ counter
 
 
 # note that currently if all of the chromosomes aren't consecutive,
-# there will be some empty chromosomes in the results, but 
-# it should not negatively effect the data
+# there will be some empty chromosomes in the results, but it should not negatively effect the data
 
-#### PLOTTING THE MALE AND FEMALE GRAPHS #####
+
+#### 3. PLOT the male and female graphs #####
 
 par(mfrow=c(1,1))
 # maternal
