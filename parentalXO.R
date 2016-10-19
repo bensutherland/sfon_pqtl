@@ -2,6 +2,30 @@
 # B. Sutherland, labo Bernatchez 2016-10-17
 # v0.1
 
+###### Load Data ######
+## First import data from the sex averaged map
+rm(list=ls())
+library(qtl)
+
+setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/05_sex_diffs_recombination")
+
+#####Import Data#########
+sfqtl <- read.cross(format="mapqtl", genfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17_loc.loc", 
+                    mapfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17-map.map", 
+                    phefile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/z-draft_analysis_mapv2/01_input_data_and_code/SfQTL_phenotypes-full_with_eQTL_hub_gene_selection.qua",
+                    genotypes = NULL, 
+                    na.strings=c("NA","--"))
+sfqtl <- jittermap(sfqtl) #jitter markers at same position
+sfqtl.bak <- sfqtl
+
+# Identify male and female individuals
+# This can be used in plotGeno with the `ind` argument
+ind.males = c(sfqtl$pheno$sex=="M")
+ind.females = c(sfqtl$pheno$sex=="F")
+
+# TODO: Remove individual with abnormal xo, and fix mislabeled sexes, and seg distortion markers
+
+
 # Install packages
 #install("qtl")
 require(qtl)
