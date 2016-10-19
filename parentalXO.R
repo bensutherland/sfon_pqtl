@@ -11,17 +11,37 @@ library(qtl)
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/05_sex_diffs_recombination")
 
 #####Import Data#########
-sfqtl <- read.cross(format="mapqtl", genfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17_loc.loc", 
-                    mapfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17-map.map", 
-                    phefile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/z-draft_analysis_mapv2/01_input_data_and_code/SfQTL_phenotypes-full_with_eQTL_hub_gene_selection.qua",
-                    genotypes = NULL, 
-                    na.strings=c("NA","--"))
-sfqtl <- jittermap(sfqtl) #jitter markers at same position
+
+# # sfqtl
+# sfqtl <- read.cross(format="mapqtl", genfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17_loc.loc", 
+#                     mapfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17-map.map", 
+#                     phefile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/z-draft_analysis_mapv2/01_input_data_and_code/SfQTL_phenotypes-full_with_eQTL_hub_gene_selection.qua",
+#                     genotypes = NULL, 
+#                     na.strings=c("NA","--"))
+# sfqtl <- jittermap(sfqtl) #jitter markers at same position
+
+# # Identify male and female individuals
+# # This can be used in plotGeno with the `ind` argument
+# ind.males = c(sfqtl$pheno$sex=="M")
+# ind.females = c(sfqtl$pheno$sex=="F")
+
+# sfon
+sfon <- read.cross(format="mapqtl"
+                   , dir="~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/02_data", 
+                   #, dir="/Users/ben/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl/02_data", 
+                   genfile = "Sfon_female_map_v4.3.loc", 
+                   mapfile = "Sfon_female_map_v4.3.map", 
+                   phefile = "SFQTL_phenotypes-full.qua",
+                   genotypes = NULL, 
+                   na.strings=c("NA","--"))
+sfon <- jittermap(sfon)
 
 # Identify male and female individuals
 # This can be used in plotGeno with the `ind` argument
-ind.males = c(sfqtl$pheno$sex=="M")
-ind.females = c(sfqtl$pheno$sex=="F")
+ind.males = c(sfon$pheno$sex=="M")
+ind.females = c(sfon$pheno$sex=="F")
+
+
 
 # TODO: Remove individual with abnormal xo, and fix mislabeled sexes, and seg distortion markers
 
@@ -449,21 +469,21 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 }
 
 
+
+##### set data #####
+# Cross
+#cross <- sfqtl
+cross <- sfon
+
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
-parentalXO(sfqtl, chr = 7, ind = c(1:10))
+parentalXO(cross, chr = 7, ind = c(1:10))
 
 
 #### 1. OBTAIN parentalXO in all chromosomes ####
 
 # Select which chromosomes to include
-#indiv <- 1:nind(sfqtl) # all individuals (experimental/unconfirmed)
-#chr <- 1:nchr(sfqtl) # all chromosomes
-
-#chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) #only metacentrics
-#chr <- acrocentrics.sfqtl <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
-
-#chr <- sex.chrom <- 22
-#chr <- non.sex.chrom <- c(1:21,23:42)
+indiv <- 1:nind(cross) # all individuals (experimental/unconfirmed)
+chr <- 1:nchr(cross) # all chromosomes
 
 ## mini-tests
 #chr <- c(1:3)
@@ -473,7 +493,7 @@ parentalXO(sfqtl, chr = 7, ind = c(1:10))
 cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL ; cum.recalc.chr.length <- NULL
 
 for(i in chr) {
-  parentalXO(sfqtl, chr = i, ind = indiv)
+  parentalXO(cross, chr = i, ind = indiv)
     cum.mxoloc.list[[i]] <- mxoloc.per.chr
     cum.dxoloc.list[[i]] <- dxoloc.per.chr
     cum.recalc.chr.length[[i]] <- recalc.chr.length
@@ -481,8 +501,8 @@ for(i in chr) {
 }
 
 # Outputs
-cum.mxoloc.list
-cum.dxoloc.list
+str(cum.mxoloc.list)
+str(cum.dxoloc.list)
 
 cum.recalc.chr.length
 
@@ -494,7 +514,7 @@ cum.recalc.chr.length
 # Uses local extension of distance for detecting double crossovers
 
 # Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
-data <- cum.dxoloc.list
+#data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
 
 # user variables
@@ -506,11 +526,14 @@ lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
 indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
 XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 
+per.chromosome.XO <- NULL
+
 # Create a subset piece from the total list per chromosome
 for(i in chr) {
   test <- data[[i]] # take out data from one chromosome
   print(c("*Treating chromosome", chr[i]), quote = F)
   print(test)
+  per.chromosome.counter <- 0
   
   # For each chromosome, count the number of XO per individual
   indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
@@ -524,10 +547,13 @@ for(i in chr) {
   current.chr.leng <- NULL
   current.chr.leng <- XO.tot.leng[i]
   print(c("THIS ROUND THE CHR IS", XO.tot.leng[i]))
+  
+  # null this chromosome's counter
+  #per.chromosome.counter <- NULL
     
     # Per chromosome, check each unique indiv
-    for(i in indiv.nums) {
-      indiv.row <- which(test[,1] == (i)) # find row(s) for the indiv of interest (per loop)
+    for(j in indiv.nums) {
+      indiv.row <- which(test[,1] == (j)) # find row(s) for the indiv of interest (per loop)
       print(c("indiv.row",indiv.row))
       
       # Per unique indiv, check each XO
@@ -575,18 +601,81 @@ for(i in chr) {
       print(c("counter", counter))
     }
   }
+  print(c("per.chromosome.counter"))
+  print(c(per.chromosome.counter, "chr", i ))
+  per.chromosome.XO[i] <- per.chromosome.counter
 }
 
 counter
 
 
-# note that currently if all of the chromosomes aren't consecutive,
-# there will be some empty chromosomes in the results, but it should not negatively effect the data
+
+
+#### Summary Statistics ####
+#set variables
+#sfqtl
+metacentrics <- c(9,18,1,15,4,7,11,5) #only metacentrics
+acrocentrics <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
+sex.chrom <- 22
+autosomes <- c(1:21,23:42)
+
+#sfon
+# metacentrics <- c(1:8)
+# acrocentrics <- c(9:42)
+# sex.chrom <- 35
+# autosome <- c(1:34,36:42)
+
+# sum, average, and 
+print(c("sum"))
+sum(per.chromosome.XO[c(metacentrics)])
+print(c("average"))
+mean(per.chromosome.XO[c(metacentrics)])
+print(c("sd"))
+sd(per.chromosome.XO[c(metacentrics)])
+
+print(c("sum"))
+sum(per.chromosome.XO[c(acrocentrics)])
+print(c("average"))
+mean(per.chromosome.XO[c(acrocentrics)])
+print(c("sd"))
+sd(per.chromosome.XO[c(acrocentrics)])
+
+print(c("sum"))
+sum(per.chromosome.XO[c(sex.chrom)])
+print(c("average"))
+mean(per.chromosome.XO[c(sex.chrom)])
+print(c("sd"))
+sd(per.chromosome.XO[c(sex.chrom)])
+
+print(c("sum"))
+sum(per.chromosome.XO[c(autosomes)])
+print(c("average"))
+mean(per.chromosome.XO[c(autosomes)])
+print(c("sd"))
+sd(per.chromosome.XO[c(autosomes)])
+
+
+
+## attempt to automate summary statistics
+# # summary statistics
+# sum(per.chromosome.XO)[metacentrics]
+# 
+# # set up a vector for your conformation
+# chr.conformation <- NULL
+# chr.conformation[metacentrics] <- "metacentric"
+# chr.conformation[acrocentrics] <- "acrocentric"
+# 
+# # make a dataframe
+# per.chromosome.XO.df <- as.data.frame(cbind(per.chromosome.XO, chr.conformation), row.names = 1:42)
+# 
+# # perform some tests
+# mean(per.chromosome.XO.df[,2])
 
 
 #### 3. PLOT the male and female graphs #####
 
-par(mfrow=c(1,1))
+#par(mfrow=c(2,1))
+par(mfrow=c(2,1), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 # maternal
 hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
 text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
@@ -594,3 +683,5 @@ text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
 # paternal
 hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
 text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
+
+# save as 7.3 * 3.8 in portrait
