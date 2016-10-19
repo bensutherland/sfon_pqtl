@@ -7,6 +7,7 @@
 rm(list=ls())
 library(qtl)
 
+# Currently for sex-averaged map (problematic map)
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/05_sex_diffs_recombination")
 
 #####Import Data#########
@@ -16,7 +17,6 @@ sfqtl <- read.cross(format="mapqtl", genfile = "/Users/wayne/Documents/bernatche
                     genotypes = NULL, 
                     na.strings=c("NA","--"))
 sfqtl <- jittermap(sfqtl) #jitter markers at same position
-sfqtl.bak <- sfqtl
 
 # Identify male and female individuals
 # This can be used in plotGeno with the `ind` argument
@@ -25,17 +25,13 @@ ind.females = c(sfqtl$pheno$sex=="F")
 
 # TODO: Remove individual with abnormal xo, and fix mislabeled sexes, and seg distortion markers
 
-
-# Install packages
-#install("qtl")
-require(qtl)
-
 ##### 0. Create formula #####
 
 # Set NULL for parentalXO
 recalc.chr.length <- NULL
 
 # An adaptation of the plotGeno() function in order to obtain the parental crossover locations
+# This produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr', a df w/ ind and loc
 
 parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
                         cutoff = 4, min.sep = 2, cex = 1.2, ...) 
@@ -452,13 +448,9 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
   invisible()
 }
 
-# This produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr', a df w/ ind and loc
-# mxoloc.per.chr
-# dxoloc.per.chr
 
-# Testing using a single round (chr 7, ind 1:10):
+# Test to make sure formula works using a single round (chr 7, ind 1:10):
 parentalXO(sfqtl, chr = 7, ind = c(1:10))
-
 
 
 #### 1. OBTAIN parentalXO in all chromosomes ####
@@ -466,11 +458,14 @@ parentalXO(sfqtl, chr = 7, ind = c(1:10))
 # Select which chromosomes to include
 #indiv <- 1:nind(sfqtl) # all individuals (experimental/unconfirmed)
 #chr <- 1:nchr(sfqtl) # all chromosomes
+
 #chr <- metacentrics.sfqtl <- c(9,18,1,15,4,7,11,5) #only metacentrics
 #chr <- acrocentrics.sfqtl <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
+
 #chr <- sex.chrom <- 22
 #chr <- non.sex.chrom <- c(1:21,23:42)
 
+## mini-tests
 #chr <- c(1:3)
 #indiv <- c(1:10)
 
@@ -498,7 +493,7 @@ cum.recalc.chr.length
 #### 2. COUNT crossovers in multiple chromosomes ####
 # Uses local extension of distance for detecting double crossovers
 
-# Choose data variable using either cum.mxoloc.list (FATHER) or cum.dxoloc.list (MOTHER)
+# Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
 data <- cum.dxoloc.list
 #data <- cum.mxoloc.list
 
@@ -570,7 +565,12 @@ for(i in chr) {
           # Collect the total chromosome length for this crossover
           CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
           #print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
+          
+          # Add one to counter
           counter <- counter + 1 
+          
+          # Add one to per.chromosome.counter
+          per.chromosome.counter <- per.chromosome.counter + 1
         }
       print(c("counter", counter))
     }
