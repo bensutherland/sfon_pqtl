@@ -604,3 +604,21 @@ plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
      xlab = "",
      bandcol="gray70")
 abline(h=summary(scanone.perms[,POI], 0.05), lty=1)
+
+
+######### Appendix 2. PLOT QTL ON GENETIC MAP #######
+qtl.pos <- c(28.3,198,162,83,115,261,169,112,89.9,46.9,150,35.7,139,31.4,66.8,47.8,114,43.3,60.3,138,22.6,139) #positions for 
+qtl.chr <- c(4,5,20,3,4,5,20,34,16,39,20,3,9,36,5,24,6,38,40,24,4,25)
+qtl.name <- c(rep("weight", times = 3), rep("length", times=5), "cfact1", "cfact2", "cfact3",
+              rep("sgr2-3", times=3), "egg.diam", "sperm.diam", "d.cort", "d.chlor", "d.osmo", "ghr",
+              rep("hemato", times=2))
+
+all.qtl <- makeqtl(cross=sfon, chr=qtl.chr, pos = qtl.pos, qtl.name=qtl.name, what = "draws")
+
+par(mfrow=c(1,1), mar= c(3.5,3.5,1,1.5) + 0.2, mgp = c(2.5,0.75,0))
+plot(all.qtl, chr = qtl.chr, alternate.chrid = T
+     , col = c(rep("blue", times=14), rep("black", times=2), rep("red", times=6))
+#     , horizontal = T
+     , justdots=F
+      , main = ""
+)
