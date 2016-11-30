@@ -17,6 +17,12 @@ setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 # Load Part 1 results:
 load("02_data/sfon_01_output.RData")
 
+# Also load subset Part 1 results
+# load("02_data/sfon_01_output_subset_only_nnxnp.RData") # subset markers
+# sfon <- sfon_only_nnxnp
+
+sfon
+
 # Set permutation variables (perm should be 1000):
 num.perm = 10000
 num.cluster = 20
