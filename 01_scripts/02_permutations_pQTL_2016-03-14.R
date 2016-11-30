@@ -7,7 +7,7 @@
 
 # install libraries
 require(qtl)
-install.packages("rlecuyer")
+# install.packages("rlecuyer")
 require(rlecuyer) #random number generator in parallel
 require(plyr)
 
@@ -17,9 +17,12 @@ setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 # Load Part 1 results:
 load("02_data/sfon_01_output.RData")
 
-## Also load subset Part 1 results
-# load("02_data/sfon_01_output_subset_only_nnxnp.RData") # subset markers
+## Also can load subset Part 1 results
+#load("02_data/sfon_01_output_subset_only_nnxnp_and_mf_sep.RData") # subset markers
+# sfon <- sfon.males
+# sfon <- sfon.females
 # sfon <- sfon_only_nnxnp
+
 ## note will need to rerun
 # sfon <- est.rf(sfon)
 # sfon <- calc.genoprob(sfon, step = 0, error.prob =0.0001) #hmm to calc prob of true underlying genos given data
@@ -28,6 +31,47 @@ sfon
 # Set permutation variables (perm should be 1000):
 num.perm = 10000
 num.cluster = 20
+
+sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
+
+# Light analysis (with sex info)
+out <- scanone(sfon, method="hk", pheno.col = c(names(ph.yes.cov),names(ph.no.cov))
+               , addcov=sex)
+set.seed(54955149)
+operm.out <- scanone(sfon, n.perm=num.perm,
+                     pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
+                     n.cluster = num.cluster
+                     , addcovar=sex)
+
+
+### SEX SPECIFIC ANALYSIS (TEMP) ###
+# scanone (consider covariate)
+out <- scanone(sfon, method="hk", pheno.col = c(names(ph.yes.cov),names(ph.no.cov)))
+set.seed(54955149)
+operm.out <- scanone(sfon, n.perm=num.perm,
+                    pheno.col = c(names(ph.yes.cov),names(ph.no.cov)),
+                    n.cluster = num.cluster)
+
+names(out)[3:29]
+summary(out, perms=operm.out, format="tabByCol", alpha=0.15, pvalues=T)
+
+# start by setting your variables
+POI <- "" #set your pheno
+scanone.mod <- out
+scanone.perms <- operm.out
+lod.col <- which(names(scanone.mod) == POI) - 2 #-2 is to account for chr and pos
+
+# then plot
+plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
+     ylim = c(0,10), 
+     ylab = POI,
+     xlab = "",
+     bandcol="gray70")
+abline(h=summary(scanone.perms[,POI], 0.05), lty=1)
+
+### END SEX SPECIFIC ANALYSIS (TEMP) ###
+
+
 
 # Create sex variable
 sex <- as.numeric(pull.pheno(sfon, "sex") == "M") #create numeric sex variable (fem 0 ; male 1)
