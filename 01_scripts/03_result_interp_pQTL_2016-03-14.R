@@ -18,6 +18,9 @@ setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_1000perms.RData") # 
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_10000perms.RData") # 
 
+# only female-specific markers
+load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData")
+
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,
                   error.prob=0.001, n.draws=256) #note that 4-way cross w sex-specific map assumes constant ratio of female:male recomb rates within inter-marker intervals
@@ -38,7 +41,7 @@ scanone.perms <- all.out.0.nocov.perm
 # Then run the following
 lod.col <- which(names(scanone.mod) == POI) - 2 #-2 is to account for chr and pos
 plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
-     #ylim = c(0,8), 
+     ylim = c(0,8), 
      ylab = POI,
      xlab = "",
      bandcol="gray70")
@@ -106,7 +109,7 @@ plot(scanone.mod, alternate.chrid=T, lodcolumn=lod.col,
      ylab = POI,
      xlab = "",
      bandcol="gray70")
-abline(h=summary(scanone.perms[,POI], 0.05), lty=3)
+abline(h=summary(scanone.perms[,POI], 0.05), lty=1)
 
 
 #Needs some special playing around to get the full model version rather than the additive model version

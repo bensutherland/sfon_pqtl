@@ -17,10 +17,12 @@ setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 # Load Part 1 results:
 load("02_data/sfon_01_output.RData")
 
-# Also load subset Part 1 results
+## Also load subset Part 1 results
 # load("02_data/sfon_01_output_subset_only_nnxnp.RData") # subset markers
 # sfon <- sfon_only_nnxnp
-
+## note will need to rerun
+# sfon <- est.rf(sfon)
+# sfon <- calc.genoprob(sfon, step = 0, error.prob =0.0001) #hmm to calc prob of true underlying genos given data
 sfon
 
 # Set permutation variables (perm should be 1000):
@@ -118,5 +120,5 @@ operm.bin <- scanone(sfon, pheno.col="binary",
 
 ### SAVE OUT PERMUTATION OBJECT ####
 #save.image(file = "sfon_02_output.RData") # save out existing data so that it can be reloaded without running all again
-
+## save.image(file = "02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData")
 #END
