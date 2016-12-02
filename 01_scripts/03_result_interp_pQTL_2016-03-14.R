@@ -73,7 +73,7 @@ colnames(operm.fmim)
 summary(operm.fmim, alpha=0.05) # provides the LOD threshold for p ≤ 0.05
 
 # Check for significance in the full model and in the interactive model alone
-summary(out.fmim, perms=operm.fmim, format="tabByCol", alpha=0.1, pvalues=TRUE)
+summary(out.fmim, perms=operm.fmim, format="tabByCol", alpha=0.15, pvalues=TRUE)
 # If high LOD comes from the interaction, rather than additive portion, sig ifx.
 # If trait has no sig ifx, check sig in additive model only (interaction uses up power)
 summary(out.am, perms=operm.am, format="tabByCol", alpha=0.1, pvalues=T)
@@ -234,21 +234,21 @@ par(mfrow=c(1,2), mar= c(2,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 
 #example with covariate, but using the actual data, not imputed data
 # first lets find the actual data
-sfon$geno[[5]]$data[1:5,1:5] # gives the genotype codes from the first five markers on chr 5 for the first five indiv (out of 170)
+sfon$geno[[4]]$data[1:5,1:5] # gives the genotype codes from the first five markers on chr 5 for the first five indiv (out of 170)
 #Important## if using mark1 make sure to use geno1 or else arbitrary rqtl genotype labels will be used (i.e. first 2)
 
 # as an example, check out a fully informative marker (with four distinct genotypes):
 par(mfrow=c(1,1))
-marker.count <- which(names(sfon$geno[[9]]$data[1,]) == "33699") #find a marker by name on chr 17
-effectplot(sfon, mname1="33699",  
-           mname2="Sex",
-           mark1=sfon$geno[[9]]$data[,marker.count], 
-           geno1=c("AG,AG","GA,AG","AG,AA","GA,AA"), #appropriate genos are added from stacks.markers.info.xlsx
-           mark2=sex, geno2=c("F","M"), 
-           pheno.col = "weight.g_0509", 
+marker.count <- which(names(sfon$geno[[4]]$data[1,]) == "7187") #find a marker by name on chr 4
+effectplot(sfon, mname1="7187",  
+           #mname2="Sex",
+           mark1=sfon$geno[[4]]$data[,marker.count], 
+           #geno1=c("AG,AG","GA,AG","AG,AA","GA,AA"), #appropriate genos are added from stacks.markers.info.xlsx
+           #mark2=sex, geno2=c("F","M"), 
+           pheno.col = "weight.g_0709", 
            #add.legend=F, 
-           #ylim = c(20,28),
-           ylab = "length (cm) at T2",
+           ylim = c(100,300),
+           ylab = "weight at T2",
            main = "",
            xlab = ""
 ) 
@@ -260,11 +260,11 @@ effectplot(sfon, mname1="33699",
 # automatic capture of the genotypes using 'mname' without assigning mark1 will
 # use the genotype data that has been imputed, and thus may be slightly dependent on
 # the sim.geno run.
-effectplot(sfon, mname1 = "85980", mname2 = "Sex",
+effectplot(sfon, mname1 = "7187", mname2 = "Sex",
            mark2=sex, geno2 = c("F","M"),
-           pheno.col = "weight.g_0509",
+           pheno.col = "weight.g_0709",
            add.legend=T,
-           #ylim = c(20,28),
+           ylim = c(100,300),
            main = "")
 
 ########## 3G PVE Genome Wide ######

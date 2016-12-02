@@ -18,31 +18,24 @@ load("02_data/sfon_01_output.RData")
 #### REMOVE SPECIFIC MARKER TYPES ####
 # Use marker list to remove markers
 #sfon_remove <- read.csv(file = "02_data/sfon_efxeg_and_hkxhk_markers.csv", header = F) # keep only nnxnp
-sfon_remove <- read.csv(file = "02_data/sfon_nnxnp_and_hkxhk_markers.csv", header = F) # keep only efxeg
+#sfon_remove <- read.csv(file = "02_data/sfon_nnxnp_and_hkxhk_markers.csv", header = F) # keep only efxeg
+sfon_remove <- read.csv(file = "02_data/sfon_efxeg_markers.csv", header =F) # keep nnxnp and hkxhk
 sfon_remove <- as.numeric(sfon_remove)
 length(sfon_remove) # markers to remove
-sfon_only_nnxnp <- drop.markers(sfon, sfon_remove) # drop markers
+sfon_limited <- drop.markers(sfon, sfon_remove) # drop markers
 rm(sfon_remove)
 # note that some may already be removed due to seg distortion filter
 
-summary(sfon_only_nnxnp) # check markers
-plot.map(sfon_only_nnxnp, alternate.chrid = T,
+summary(sfon_limited) # check markers
+plot.map(sfon_limited, alternate.chrid = T,
          main = "", xlab = "Linkage Group")
-text(x = 35, y = 260, labels = paste("n =", sum(nmar(sfon_only_nnxnp)), "markers"))
-
-
-# KEEP ONLY efxeg
-
-
-
-
-
-
+text(x = 35, y = 260, labels = paste("n =", sum(nmar(sfon_limited)), "markers"))
 
 
 
 ##export subset data
 # save.image(file = "02_data/sfon_01_output_subset_only_nnxnp.RData")
+# save.image(file = "02_data/sfon_01_output_subset_only_nnxnp_and_hkxhk.RData")
 
 #### REMOVE SPECIFIC INDIV SEX ####
 # Identify male and female individuals
