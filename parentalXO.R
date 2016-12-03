@@ -19,10 +19,6 @@ sfon
 ind.males = c(sfon$pheno$sex=="M")
 ind.females = c(sfon$pheno$sex=="F")
 
-
-
-# TODO: Remove individual with abnormal xo, and fix mislabeled sexes, and seg distortion markers
-
 ##### 0. Create formula #####
 
 # Set NULL for parentalXO
