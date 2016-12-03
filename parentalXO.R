@@ -7,34 +7,12 @@
 rm(list=ls())
 library(qtl)
 
-# Currently for sex-averaged map (problematic map)
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/05_sex_diffs_recombination")
+# set working directory
+setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
-#####Import Data#########
-
-# # sfqtl
-# sfqtl <- read.cross(format="mapqtl", genfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17_loc.loc", 
-#                     mapfile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/01_Sfon_map/01_genetic_map/03_map_v2/linkage_groups-new4-5-7-12-13-17-map.map", 
-#                     phefile = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/z-draft_analysis_mapv2/01_input_data_and_code/SfQTL_phenotypes-full_with_eQTL_hub_gene_selection.qua",
-#                     genotypes = NULL, 
-#                     na.strings=c("NA","--"))
-# sfqtl <- jittermap(sfqtl) #jitter markers at same position
-
-# # Identify male and female individuals
-# # This can be used in plotGeno with the `ind` argument
-# ind.males = c(sfqtl$pheno$sex=="M")
-# ind.females = c(sfqtl$pheno$sex=="F")
-
-# sfon
-sfon <- read.cross(format="mapqtl"
-                   , dir="~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/02_data", 
-                   #, dir="/Users/ben/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl/02_data", 
-                   genfile = "Sfon_female_map_v4.3.loc", 
-                   mapfile = "Sfon_female_map_v4.3.map", 
-                   phefile = "SFQTL_phenotypes-full.qua",
-                   genotypes = NULL, 
-                   na.strings=c("NA","--"))
-sfon <- jittermap(sfon)
+# Load Part 1 results:
+load("02_data/sfon_01_output.RData")
+sfon
 
 # Identify male and female individuals
 # This can be used in plotGeno with the `ind` argument
