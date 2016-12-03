@@ -136,7 +136,8 @@ plot.map(sfon, alternate.chrid=T, main = "")
 plot.info(sfon, alternate.chrid = T, fourwaycross = "all") #check for missing data
 plot.info(sfon, alternate.chrid = T, fourwaycross = "AB") # missing alleles from parent 1
 plot.info(sfon, alternate.chrid = T, fourwaycross = "CD") # missing alleles from parent 2
-# note that a larger amount of missing info for parent 1 (the male); possibly expected?
+# note that a larger amount of missing information for parent 1 (the male), unclear why
+
 z <- plot.info(sfon, alternate.chrid = T, step=0) #step gives density of grid; #step = 0; calc only performed at the markers
 dim(z) #5997 rows, three cols
 head(z) #name.marker; chr; pos; misinfo.entropy
@@ -155,11 +156,15 @@ abline(v = 100)
 
 # Bit of exploration of which samples/markers are missing high numbers of genotypes
 marker.miss.geno <- nmissing(sfon, what="mar") 
-marker.miss.geno[marker.miss.geno>80]
+marker.miss.geno[marker.miss.geno>75]
 
 indiv.miss.geno <- nmissing(sfon, what="ind")
 sfon$pheno$Fish.ID[which(indiv.miss.geno > 2000)]
 
+## to do outside of R to find out what types of markers have highest missing data (most are nnxnp, but most are..)
+# write.csv(test, file = "03_results/markers_missing_more_than_75_indiv_genos.csv", quote = F)
+# awk -F, '{ print $1 }' 03_results/markers_missing_more_than_75_indiv_genos.csv | grep -vE '$^' > 03_results/markers_missing_more_than_75_indiv_genos_clean.txt
+# grep -f 03_results/markers_missing_more_than_75_indiv_genos_clean.txt 02_data/*.loc | less
 
 #####1H GENOTYPE ERRORS #####
 # Takes a very long time, use multiple cores, and only do with the final version of the map
@@ -281,10 +286,6 @@ names(subset.samplesizes)
 avg.sd.n.df <- as.data.frame(rbind(data, subset.samplesizes))
 str(avg.sd.n.df)
 write.csv(x = t(avg.sd.n.df), file = "avg.sd.n.csv", quote = F)
-
-
-
-
 
 #######NOW GO TO PART 2 SCRIPT TO DO SCANONE PERM TESTS#######
 #export CLEANED INPUT DATA FOR SCANONE PERM TESTS #######
