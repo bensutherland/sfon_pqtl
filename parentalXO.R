@@ -20,11 +20,10 @@ ind.males = c(sfon$pheno$sex=="M")
 ind.females = c(sfon$pheno$sex=="F")
 
 ##### 0. Create formula #####
-
 # Set NULL for parentalXO
 recalc.chr.length <- NULL
 
-# An adaptation of the plotGeno() function in order to obtain the parental crossover locations
+# An adaptation of the plotGeno() (R/qtl) function in order to obtain the parental crossover locations
 # This produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr', a df w/ ind and loc
 
 parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
@@ -445,8 +444,6 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 
 
 ##### set data #####
-# Cross
-#cross <- sfqtl
 cross <- sfon
 
 # Test to make sure formula works using a single round (chr 7, ind 1:10):

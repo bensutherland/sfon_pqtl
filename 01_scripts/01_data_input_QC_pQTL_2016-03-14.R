@@ -136,7 +136,8 @@ plot.map(sfon, alternate.chrid=T, main = "")
 plot.info(sfon, alternate.chrid = T, fourwaycross = "all") #check for missing data
 plot.info(sfon, alternate.chrid = T, fourwaycross = "AB") # missing alleles from parent 1
 plot.info(sfon, alternate.chrid = T, fourwaycross = "CD") # missing alleles from parent 2
-# note that a larger amount of missing information for parent 1 (the male), unclear why
+# note that a larger amount of missing information for parent 1 (the male)
+# this only occurs due to the male-specific markers not being included
 
 z <- plot.info(sfon, alternate.chrid = T, step=0) #step gives density of grid; #step = 0; calc only performed at the markers
 dim(z) #5997 rows, three cols
