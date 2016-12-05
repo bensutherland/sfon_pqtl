@@ -11,8 +11,9 @@ library(qtl)
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
 # Load Part 1 results:
-load("02_data/sfon_01_output.RData")
-sfon
+# load("02_data/sfon_01_output.RData")
+load("02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData") # 
+sfon_limited
 
 # Identify male and female individuals
 # This can be used in plotGeno with the `ind` argument
@@ -442,9 +443,8 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 }
 
 
-
 ##### set data #####
-cross <- sfon
+cross <- sfon_limited # for efxeg and hkxhk markers only
 
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
 parentalXO(cross, chr = 7, ind = c(1:10))
@@ -485,11 +485,11 @@ cum.recalc.chr.length
 # Uses local extension of distance for detecting double crossovers
 
 # Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
-#data <- cum.dxoloc.list
-#data <- cum.mxoloc.list
+#data <- cum.dxoloc.list #P2
+#data <- cum.mxoloc.list #P1
 
 # user variables
-dist <- 100 # distance of 100 cM added to each side
+dist <- 20 # distance of 100 cM added to each side
 chr <- 1:length(data) # for all
 
 # NULL variables
