@@ -489,7 +489,7 @@ cum.recalc.chr.length
 #data <- cum.mxoloc.list #P1
 
 # user variables
-dist <- 20 # distance of 100 cM added to each side
+dist <- 50 # distance to be screened on each side for crossovers
 chr <- 1:length(data) # for all
 
 # NULL variables
