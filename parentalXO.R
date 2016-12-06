@@ -2,6 +2,10 @@
 # B. Sutherland, labo Bernatchez 2016-10-17
 # v0.1
 
+# rm(list=ls())
+library(qtl)
+
+
 ##### 0. Create formula #####
 # Set NULL for parentalXO
 recalc.chr.length <- NULL
@@ -425,14 +429,7 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 }
 
 
-#####################
-
-
 ###### Load Data ######
-## First import data from the sex averaged map
-rm(list=ls())
-library(qtl)
-
 # set working directory
 setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
@@ -441,32 +438,29 @@ setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 load("02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData")
 sfon_limited
 
-# Identify male and female individuals
-# This can be used in plotGeno with the `ind` argument
+# Identify male and female individuals (plotGeno uses 'ind' arg)
 ind.males = c(sfon$pheno$sex=="M")
 ind.females = c(sfon$pheno$sex=="F")
 
-# Identify autosomes, sex chromosome or metacentrics and acrocentrics
-# This can be used in plotGeno with the `chr` argument
+# Identify autosomes, sex chr, metacentrics and acrocentrics (plotGeno uses 'chr' arg)
 metacentrics <- c(1:8)
 acrocentrics <- c(9:42)
 sex.chrom <- 35
 autosomes <- c(1:34,36:42)
 
 # Create cross types with the desired chromosomes
-sfon_limited_metacentrics <- subset(sfon_limited, chr = metacentrics)
+#sfon_limited_metacentrics <- subset(sfon_limited, chr = metacentrics)
 #sfon_limited_acrocentrics <- subset(sfon_limited, chr = acrocentrics)
 
 
-##### set data #####
-# cross <- sfon_limited # for efxeg and hkxhk markers only
-cross <- sfon_limited_metacentrics # for metacentrics
+##### Set Data #####
+cross <- sfon_limited # for efxeg and hkxhk markers only
+#cross <- sfon_limited_metacentrics # for metacentrics
 #cross <- sfon_limited_acrocentrics # for acrocentrics
 
 # Select which individuals to include
-indiv <- 1:nind(cross) # all individuals (experimental/unconfirmed)
-
-chr <- 
+indiv <- 1:nind(cross) # all individuals
+chr <- as.numeric(names(cross$geno))
 
 # first need to calculate errorlod
 #sfon_limited <- calc.errorlod(cross = cross)
@@ -474,16 +468,28 @@ chr <-
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
 parentalXO(cross, chr = 7, ind = c(1:10))
 
+##### TROUBLESHOOTING STARTS HERE ###
+
+# mini tests
+chr <- 2
+indiv <- 1:20
+
+
 #### 1. OBTAIN parentalXO in all chromosomes ####
 # NULL variables
 cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL ; cum.recalc.chr.length <- NULL
+name <- NULL
 
 for(i in chr) {
-  parentalXO(cross, chr = i, ind = indiv)
-    cum.mxoloc.list[[i]] <- mxoloc.per.chr
-    cum.dxoloc.list[[i]] <- dxoloc.per.chr
-    cum.recalc.chr.length[[i]] <- recalc.chr.length
-    #print(cum.recalc.chr.length[i])
+    parentalXO(cross, chr = i, ind = indiv)
+    
+    # new method that instead of using i uses name
+    name <- paste("chr",i,sep="")
+    print(name)
+    
+    cum.mxoloc.list[[name]] <- mxoloc.per.chr
+    cum.dxoloc.list[[name]] <- dxoloc.per.chr
+    cum.recalc.chr.length[[name]] <- recalc.chr.length
 }
 
 # Outputs
@@ -495,11 +501,12 @@ cum.recalc.chr.length
 # NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
+
 #### 2. COUNT crossovers in multiple chromosomes ####
 # Uses local extension of distance for detecting double crossovers
 
 # user variables
-dist <- 50 # distance to be screened on each side for crossovers
+distance <- 50 # distance to be screened on each side for crossovers
 #chr <- 1:length(data) # for all
 
 # Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
@@ -512,11 +519,20 @@ lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
 indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
 XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 per.chromosome.XO <- NULL
+name <- NULL
+
+chr.name <- as.character(chr)
+
 
 # Create a subset piece from the total list per chromosome
 for(i in chr) {
+  
+  # new method that instead of using i uses name
+  name <- paste("chr",i,sep="")
+  print(name)
+  
   test <- data[[i]] # take out data from one chromosome
-  print(c("*Treating chromosome", chr[i]), quote = F)
+  print(c("*Treating chromosome", i), quote = F)
   print(test)
   per.chromosome.counter <- 0
   
@@ -525,43 +541,49 @@ for(i in chr) {
   print(c("**Treating Sample:", indiv.nums), quote=F)
   
   # For each chromosome, record the total length
-  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[(i)]) # experimental
+  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[name])
   print(c("***XO.tot.len", XO.tot.leng), quote=F)  
   
   # extract this chromosome loop's chromosome length
   current.chr.leng <- NULL
-  current.chr.leng <- XO.tot.leng[i]
-  print(c("THIS ROUND THE CHR IS", XO.tot.leng[i]))
+  current.chr.leng <- XO.tot.leng[name]
+  print(c("THIS ROUND THE CHR IS", XO.tot.leng[name]))
   
-  # null this chromosome's counter
+  # NULL this chromosome's counter
   #per.chromosome.counter <- NULL
+  ### IS THIS OK?
     
     # Per chromosome, check each unique indiv
     for(j in indiv.nums) {
       indiv.row <- which(test[,1] == (j)) # find row(s) for the indiv of interest (per loop)
+      print(c("THIS IS ****", j))
       print(c("indiv.row",indiv.row))
       
       # Per unique indiv, check each XO
       for(loc in indiv.row) {
       
+        print("DEFINING RANGE")
         print(test[(loc),2])
-        lower <- test[(loc),2] - dist
-        upper <- test[(loc),2] + dist
+        lower <- test[(loc),2] - distance
+        upper <- test[(loc),2] + distance
         print(c(lower, upper))
       
         # TRUE for each XO in range
+        print("FOR EACH INDIVIDUAL IN THIS CHR, score TRUE for each XO within range")
         test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
         print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
       
         # Number of XO within the range
-        print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs in area")) 
+        print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs on chr")) 
         
         # 0 if EVEN, 1 if ODD
+        print("**** 0 if EVEN, 1 if ODD ****")
         print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2) 
       
         # True to add 1 to counter
         odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
-        print(c("odd.even", odd.even))
+        print("IS THIS XO ODD OR EVEN")
+        print(odd.even)
         
         # If odd number (1), add a XO to the counter; if even (0) do not add
         if(odd.even == 0) {
@@ -588,7 +610,7 @@ for(i in chr) {
   }
   print(c("per.chromosome.counter"))
   print(c(per.chromosome.counter, "chr", i ))
-  per.chromosome.XO[i] <- per.chromosome.counter
+  per.chromosome.XO[name] <- per.chromosome.counter
 }
 
 counter
