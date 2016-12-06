@@ -448,25 +448,18 @@ acrocentrics <- c(9:42)
 sex.chrom <- 35
 autosomes <- c(1:34,36:42)
 
-# Create cross types with the desired chromosomes
-#sfon_limited_metacentrics <- subset(sfon_limited, chr = metacentrics)
-#sfon_limited_acrocentrics <- subset(sfon_limited, chr = acrocentrics)
-#sfon_limited_acrocentrics <- subset(sfon_limited, chr = sex.chrom)
-#sfon_limited_acrocentrics <- subset(sfon_limited, chr = autosomes)
-
-
 ##### Set Data #####
+# Create cross types with the desired chromosomes
 cross <- sfon_limited # for efxeg and hkxhk markers only
-#cross <- sfon_limited_metacentrics # for metacentrics
-#cross <- sfon_limited_acrocentrics # for acrocentrics
-#cross <- sfon_limited_sex_chrom
-#cross <- sfon_limited_autosomes
-
+# cross <- subset(sfon_limited, chr = metacentrics)
+# cross <- subset(sfon_limited, chr = acrocentrics)
+# cross <- subset(sfon_limited, chr = sex.chrom)
+# cross <- subset(sfon_limited, chr = autosomes)
 
 # Select which individuals to include
 indiv <- 1:nind(cross) # all individuals
-#chr <- as.numeric(names(cross$geno))
-chr <- 10:20
+chr <- as.numeric(names(cross$geno))
+#chr <- 10:20
 #chr <- 41
 
 # first need to calculate errorlod
