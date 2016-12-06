@@ -2,24 +2,6 @@
 # B. Sutherland, labo Bernatchez 2016-10-17
 # v0.1
 
-###### Load Data ######
-## First import data from the sex averaged map
-rm(list=ls())
-library(qtl)
-
-# set working directory
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
-
-# Load Part 1 results:
-# load("02_data/sfon_01_output.RData")
-load("02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData") # 
-sfon_limited
-
-# Identify male and female individuals
-# This can be used in plotGeno with the `ind` argument
-ind.males = c(sfon$pheno$sex=="M")
-ind.females = c(sfon$pheno$sex=="F")
-
 ##### 0. Create formula #####
 # Set NULL for parentalXO
 recalc.chr.length <- NULL
@@ -443,23 +425,56 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 }
 
 
+#####################
+
+
+###### Load Data ######
+## First import data from the sex averaged map
+rm(list=ls())
+library(qtl)
+
+# set working directory
+setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
+
+# Load Part 1 results:
+# load("02_data/sfon_01_output.RData")
+load("02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData")
+sfon_limited
+
+# Identify male and female individuals
+# This can be used in plotGeno with the `ind` argument
+ind.males = c(sfon$pheno$sex=="M")
+ind.females = c(sfon$pheno$sex=="F")
+
+# Identify autosomes, sex chromosome or metacentrics and acrocentrics
+# This can be used in plotGeno with the `chr` argument
+metacentrics <- c(1:8)
+acrocentrics <- c(9:42)
+sex.chrom <- 35
+autosomes <- c(1:34,36:42)
+
+# Create cross types with the desired chromosomes
+sfon_limited_metacentrics <- subset(sfon_limited, chr = metacentrics)
+#sfon_limited_acrocentrics <- subset(sfon_limited, chr = acrocentrics)
+
+
 ##### set data #####
-cross <- sfon_limited # for efxeg and hkxhk markers only
+# cross <- sfon_limited # for efxeg and hkxhk markers only
+cross <- sfon_limited_metacentrics # for metacentrics
+#cross <- sfon_limited_acrocentrics # for acrocentrics
+
+# Select which individuals to include
+indiv <- 1:nind(cross) # all individuals (experimental/unconfirmed)
+
+chr <- 
+
+# first need to calculate errorlod
+#sfon_limited <- calc.errorlod(cross = cross)
 
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
 parentalXO(cross, chr = 7, ind = c(1:10))
 
-
 #### 1. OBTAIN parentalXO in all chromosomes ####
-
-# Select which chromosomes to include
-indiv <- 1:nind(cross) # all individuals (experimental/unconfirmed)
-chr <- 1:nchr(cross) # all chromosomes
-
-## mini-tests
-#chr <- c(1:3)
-#indiv <- c(1:10)
-
 # NULL variables
 cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL ; cum.recalc.chr.length <- NULL
 
@@ -477,26 +492,25 @@ str(cum.dxoloc.list)
 
 cum.recalc.chr.length
 
-
 # NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 
 #### 2. COUNT crossovers in multiple chromosomes ####
 # Uses local extension of distance for detecting double crossovers
 
-# Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
-#data <- cum.dxoloc.list #P2
-#data <- cum.mxoloc.list #P1
-
 # user variables
 dist <- 50 # distance to be screened on each side for crossovers
-chr <- 1:length(data) # for all
+#chr <- 1:length(data) # for all
+
+# Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
+data <- cum.dxoloc.list #P2
+#data <- cum.mxoloc.list #P1
+
 
 # NULL variables
 lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
 indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
 XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
-
 per.chromosome.XO <- NULL
 
 # Create a subset piece from the total list per chromosome
@@ -580,6 +594,19 @@ for(i in chr) {
 counter
 
 
+#### 3. PLOT the male and female graphs #####
+par(mfrow=c(2,1), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+# maternal
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), las = 1 )
+text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
+
+# paternal
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), las = 1)
+text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
+
+# save as 7.3 * 3.8 in portrait
+
+
 
 
 #### Summary Statistics ####
@@ -590,11 +617,6 @@ acrocentrics <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
 sex.chrom <- 22
 autosomes <- c(1:21,23:42)
 
-#sfon
-# metacentrics <- c(1:8)
-# acrocentrics <- c(9:42)
-# sex.chrom <- 35
-# autosome <- c(1:34,36:42)
 
 # sum, average, and 
 print(c("sum"))
@@ -643,16 +665,4 @@ sd(per.chromosome.XO[c(autosomes)])
 # mean(per.chromosome.XO.df[,2])
 
 
-#### 3. PLOT the male and female graphs #####
 
-#par(mfrow=c(2,1))
-par(mfrow=c(2,1), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
-# maternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
-text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
-
-# paternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000))
-text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
-
-# save as 7.3 * 3.8 in portrait
