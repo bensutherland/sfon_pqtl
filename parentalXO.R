@@ -451,28 +451,36 @@ autosomes <- c(1:34,36:42)
 # Create cross types with the desired chromosomes
 #sfon_limited_metacentrics <- subset(sfon_limited, chr = metacentrics)
 #sfon_limited_acrocentrics <- subset(sfon_limited, chr = acrocentrics)
+#sfon_limited_acrocentrics <- subset(sfon_limited, chr = sex.chrom)
+#sfon_limited_acrocentrics <- subset(sfon_limited, chr = autosomes)
 
 
 ##### Set Data #####
 cross <- sfon_limited # for efxeg and hkxhk markers only
 #cross <- sfon_limited_metacentrics # for metacentrics
 #cross <- sfon_limited_acrocentrics # for acrocentrics
+#cross <- sfon_limited_sex_chrom
+#cross <- sfon_limited_autosomes
+
 
 # Select which individuals to include
 indiv <- 1:nind(cross) # all individuals
-chr <- as.numeric(names(cross$geno))
+#chr <- as.numeric(names(cross$geno))
+chr <- 10:20
+#chr <- 41
 
 # first need to calculate errorlod
-#sfon_limited <- calc.errorlod(cross = cross)
+# sfon_limited <- calc.errorlod(cross = cross)
+# note that this will change the lengths in the map
 
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
 parentalXO(cross, chr = 7, ind = c(1:10))
 
-##### TROUBLESHOOTING STARTS HERE ###
 
-# mini tests
-chr <- 2
-indiv <- 1:20
+##### TROUBLESHOOTING STARTS HERE ###
+# # mini tests
+# chr <- 2
+# indiv <- 1:20
 
 
 #### 1. OBTAIN parentalXO in all chromosomes ####
@@ -521,9 +529,6 @@ XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 per.chromosome.XO <- NULL
 name <- NULL
 
-chr.name <- as.character(chr)
-
-
 # Create a subset piece from the total list per chromosome
 for(i in chr) {
   
@@ -531,7 +536,10 @@ for(i in chr) {
   name <- paste("chr",i,sep="")
   print(name)
   
-  test <- data[[i]] # take out data from one chromosome
+  # EXPERIMENTAL
+  test <- data[[name]] # take out data from one chromosome
+  
+  #test <- data[[i]] # take out data from one chromosome
   print(c("*Treating chromosome", i), quote = F)
   print(test)
   per.chromosome.counter <- 0
