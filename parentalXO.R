@@ -621,30 +621,54 @@ even.counter
 
 
 # collect info
-# metacentrics
-XO.spot.CUMULATIVE.CHR.mat.meta <- XO.spot/CUMULATIVE.CHR
-XO.spot.CUMULATIVE.CHR.pat.meta <- XO.spot/CUMULATIVE.CHR
-# acrocentrics
-XO.spot.CUMULATIVE.CHR.mat.acro <- XO.spot/CUMULATIVE.CHR
-XO.spot.CUMULATIVE.CHR.pat.acro <- XO.spot/CUMULATIVE.CHR
-# sex
-XO.spot.CUMULATIVE.CHR.mat.sex <- XO.spot/CUMULATIVE.CHR
-XO.spot.CUMULATIVE.CHR.pat.sex <- XO.spot/CUMULATIVE.CHR
+## metacentrics
+# XO.spot.CUMULATIVE.CHR.mat.meta <- XO.spot/CUMULATIVE.CHR
+# XO.spot.CUMULATIVE.CHR.pat.meta <- XO.spot/CUMULATIVE.CHR
+## acrocentrics
+# XO.spot.CUMULATIVE.CHR.mat.acro <- XO.spot/CUMULATIVE.CHR
+# XO.spot.CUMULATIVE.CHR.pat.acro <- XO.spot/CUMULATIVE.CHR
+## sex
+# XO.spot.CUMULATIVE.CHR.mat.sex <- XO.spot/CUMULATIVE.CHR
+# XO.spot.CUMULATIVE.CHR.pat.sex <- XO.spot/CUMULATIVE.CHR
 
 
 #### 3. PLOT the male and female graphs #####
-par(mfrow=c(2,1), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+
+# choose a subset
+chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.meta
+chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.meta
+
+chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.acro
+chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.acro
+
+chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.sex
+chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.sex
+
+maximum <- 500
+
 # maternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
-text(x = 15, y = 90, labels = paste("maternal: n =", length(XO.spot), "XO"))
+hist(chr.set.mat*100, xlab = "Relative position of XO (%)", main = ""
+     , ylim = c(0,maximum), xlim = c(0,100), las = 1)
+text(x = 40, y = maximum, labels = paste("mat: n =", length(chr.set.mat), "XO"))
 
 # paternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
-text(x = 15, y = 90, labels = paste("paternal: n =", length(XO.spot), "XO"))
+hist(chr.set.pat*100, xlab = "Relative position of XO (%)", main = ""
+     , ylim = c(0,maximum), xlim = c(0,100), las = 1)
+text(x = 40, y = maximum, labels = paste("pat: n =", length(chr.set.pat), "XO"))
+
+
+# # maternal
+# hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), xlim = c(0,100), las = 1)
+# text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
+# 
+# # paternal
+# hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
+# text(x = 15, y = 90, labels = paste("paternal: n =", length(XO.spot), "XO"))
 
 # save as 7.3 * 3.8 in portrait
 #or
-# save as 6 * 6 for triple
+# save as 7 * 4.5 for six panel
 
 
 
