@@ -444,7 +444,7 @@ ind.females = c(sfon$pheno$sex=="F")
 
 # Identify autosomes, sex chr, metacentrics and acrocentrics (plotGeno uses 'chr' arg)
 metacentrics <- c(1:8)
-acrocentrics <- c(9:42)
+acrocentrics <- c(9:34,36:42)
 sex.chrom <- 35
 autosomes <- c(1:34,36:42)
 
@@ -467,7 +467,7 @@ chr <- as.numeric(names(cross$geno))
 # note that this will change the lengths in the map
 
 # Test to make sure formula works using a single round (chr 7, ind 1:10):
-parentalXO(cross, chr = 7, ind = c(1:10))
+# parentalXO(cross, chr = 7, ind = c(1:10))
 
 
 ##### TROUBLESHOOTING STARTS HERE ###
@@ -508,12 +508,12 @@ cum.recalc.chr.length
 
 # user variables
 distance <- 50 # distance to be screened on each side for crossovers
+#distance <- 0.1 # if want to evaluate what happens if no double crossovers are removed
 #chr <- 1:length(data) # for all
 
 # Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
 data <- cum.dxoloc.list #P2
 #data <- cum.mxoloc.list #P1
-
 
 # NULL variables
 lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
@@ -521,6 +521,7 @@ indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
 XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
 per.chromosome.XO <- NULL
 name <- NULL
+even.counter <- 0
 
 # Create a subset piece from the total list per chromosome
 for(i in chr) {
@@ -590,6 +591,7 @@ for(i in chr) {
         if(odd.even == 0) {
           print("even")
           counter <- counter
+          even.counter <- even.counter + 1
         } else {
           print("odd")
           
@@ -615,20 +617,34 @@ for(i in chr) {
 }
 
 counter
+even.counter
+
+
+# collect info
+# metacentrics
+XO.spot.CUMULATIVE.CHR.mat.meta <- XO.spot/CUMULATIVE.CHR
+XO.spot.CUMULATIVE.CHR.pat.meta <- XO.spot/CUMULATIVE.CHR
+# acrocentrics
+XO.spot.CUMULATIVE.CHR.mat.acro <- XO.spot/CUMULATIVE.CHR
+XO.spot.CUMULATIVE.CHR.pat.acro <- XO.spot/CUMULATIVE.CHR
+# sex
+XO.spot.CUMULATIVE.CHR.mat.sex <- XO.spot/CUMULATIVE.CHR
+XO.spot.CUMULATIVE.CHR.pat.sex <- XO.spot/CUMULATIVE.CHR
 
 
 #### 3. PLOT the male and female graphs #####
 par(mfrow=c(2,1), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 # maternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), las = 1 )
-text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
+text(x = 15, y = 90, labels = paste("maternal: n =", length(XO.spot), "XO"))
 
 # paternal
-hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), las = 1)
-text(x = 15, y = 900, labels = paste("paternal: n =", length(XO.spot), "XO"))
+hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
+text(x = 15, y = 90, labels = paste("paternal: n =", length(XO.spot), "XO"))
 
 # save as 7.3 * 3.8 in portrait
-
+#or
+# save as 6 * 6 for triple
 
 
 
