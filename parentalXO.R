@@ -1,6 +1,7 @@
 # Count crossovers controlling for likely false double crossovers
 # B. Sutherland, labo Bernatchez 2016-10-17
 # v0.1
+# NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
 
 # rm(list=ls())
 library(qtl)
@@ -448,275 +449,219 @@ acrocentrics <- c(9:34,36:42)
 sex.chrom <- 35
 autosomes <- c(1:34,36:42)
 
-##### Set Data #####
-# Create cross types with the desired chromosomes
-cross <- sfon_limited # for efxeg and hkxhk markers only
-# cross <- subset(sfon_limited, chr = metacentrics)
-# cross <- subset(sfon_limited, chr = acrocentrics)
-# cross <- subset(sfon_limited, chr = sex.chrom)
-# cross <- subset(sfon_limited, chr = autosomes)
+#### OBTAIN parentalXO in sets ####
 
-# Select which individuals to include
-indiv <- 1:nind(cross) # all individuals
-chr <- as.numeric(names(cross$geno))
-#chr <- 10:20
-#chr <- 41
+# create an object with directions of which chromosomes to obtain
+sets <- NULL; cross <- NULL; indiv <- NULL; chr = NULL
+outing <- NULL; outing <- list(); name.of.sets <- NULL
+collect.me <- NULL; collect.me <- list()
+index <- NULL
+sets <- list()
+sets[[1]] <- metacentrics
+sets[[2]] <- acrocentrics
+sets[[3]] <- sex.chrom
 
-# first need to calculate errorlod
-# sfon_limited <- calc.errorlod(cross = cross)
-# note that this will change the lengths in the map
+name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
 
-# Test to make sure formula works using a single round (chr 7, ind 1:10):
-# parentalXO(cross, chr = 7, ind = c(1:10))
-
-
-##### TROUBLESHOOTING STARTS HERE ###
-# # mini tests
-# chr <- 2
-# indiv <- 1:20
-
-
-#### 1. OBTAIN parentalXO in all chromosomes ####
-# NULL variables
-cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL ; cum.recalc.chr.length <- NULL
-name <- NULL
-
-for(i in chr) {
-    parentalXO(cross, chr = i, ind = indiv)
+# Loop to subset 
+for(i in 1:length(sets)) {
+  set.name <- NULL
+  set.name <- name.of.sets[i]
+  print(set.name) #provide a name for the set
+  
+  #subset data
+  cross <- subset(sfon_limited, chr = sets[[i]])
+  print(nchr(cross))
+  indiv <- 1:nind(cross) # for full set
+  #indiv <- 1:10
+  chr <- as.numeric(names(cross$geno))
+  
+  # Obtain parentalXO in selected set
+  # set NULL
+  cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL 
+  cum.recalc.chr.length <- NULL; name <- NULL
+  
+  for(c in chr) {
+    parentalXO(cross, chr = c, ind = indiv)
     
     # new method that instead of using i uses name
-    name <- paste("chr",i,sep="")
+    name <- paste("chr",c,sep="") # BETTER
     print(name)
     
     cum.mxoloc.list[[name]] <- mxoloc.per.chr
     cum.dxoloc.list[[name]] <- dxoloc.per.chr
     cum.recalc.chr.length[[name]] <- recalc.chr.length
-}
-
-# Outputs
-str(cum.mxoloc.list)
-str(cum.dxoloc.list)
-
-cum.recalc.chr.length
-
-# NOTE: because my P1 = Male instead of standard (= female), mxoloc = P1..
-
-
-
-#### 2. COUNT crossovers in multiple chromosomes ####
-# Uses local extension of distance for detecting double crossovers
-
-# user variables
-distance <- 50 # distance to be screened on each side for crossovers
-#distance <- 0.1 # if want to evaluate what happens if no double crossovers are removed
-#chr <- 1:length(data) # for all
-
-# Choose data variable using either cum.mxoloc.list (here: FATHER) or cum.dxoloc.list (here: MOTHER)
-data <- cum.dxoloc.list #P2
-#data <- cum.mxoloc.list #P1
-
-# NULL variables
-lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
-indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
-XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
-per.chromosome.XO <- NULL
-name <- NULL
-even.counter <- 0
-
-# Create a subset piece from the total list per chromosome
-for(i in chr) {
-  
-  # new method that instead of using i uses name
-  name <- paste("chr",i,sep="")
-  print(name)
-  
-  # EXPERIMENTAL
-  test <- data[[name]] # take out data from one chromosome
-  
-  #test <- data[[i]] # take out data from one chromosome
-  print(c("*Treating chromosome", i), quote = F)
-  print(test)
-  per.chromosome.counter <- 0
-  
-  # For each chromosome, count the number of XO per individual
-  indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
-  print(c("**Treating Sample:", indiv.nums), quote=F)
-  
-  # For each chromosome, record the total length
-  XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[name])
-  print(c("***XO.tot.len", XO.tot.leng), quote=F)  
-  
-  # extract this chromosome loop's chromosome length
-  current.chr.leng <- NULL
-  current.chr.leng <- XO.tot.leng[name]
-  print(c("THIS ROUND THE CHR IS", XO.tot.leng[name]))
-  
-  # NULL this chromosome's counter
-  #per.chromosome.counter <- NULL
-  ### IS THIS OK?
-    
-    # Per chromosome, check each unique indiv
-    for(j in indiv.nums) {
-      indiv.row <- which(test[,1] == (j)) # find row(s) for the indiv of interest (per loop)
-      print(c("THIS IS ****", j))
-      print(c("indiv.row",indiv.row))
-      
-      # Per unique indiv, check each XO
-      for(loc in indiv.row) {
-      
-        print("DEFINING RANGE")
-        print(test[(loc),2])
-        lower <- test[(loc),2] - distance
-        upper <- test[(loc),2] + distance
-        print(c(lower, upper))
-      
-        # TRUE for each XO in range
-        print("FOR EACH INDIVIDUAL IN THIS CHR, score TRUE for each XO within range")
-        test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
-        print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
-      
-        # Number of XO within the range
-        print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs on chr")) 
-        
-        # 0 if EVEN, 1 if ODD
-        print("**** 0 if EVEN, 1 if ODD ****")
-        print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2) 
-      
-        # True to add 1 to counter
-        odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
-        print("IS THIS XO ODD OR EVEN")
-        print(odd.even)
-        
-        # If odd number (1), add a XO to the counter; if even (0) do not add
-        if(odd.even == 0) {
-          print("even")
-          counter <- counter
-          even.counter <- even.counter + 1
-        } else {
-          print("odd")
-          
-          # Collect the location of this crossover
-          XO.spot <<- c(XO.spot, print(test[(loc),2]))
-          
-          # Collect the total chromosome length for this crossover
-          CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
-          #print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
-          
-          # Add one to counter
-          counter <- counter + 1 
-          
-          # Add one to per.chromosome.counter
-          per.chromosome.counter <- per.chromosome.counter + 1
-        }
-      print(c("counter", counter))
-    }
   }
-  print(c("per.chromosome.counter"))
-  print(c(per.chromosome.counter, "chr", i ))
-  per.chromosome.XO[name] <- per.chromosome.counter
+  
+  str(cum.mxoloc.list)
+  str(cum.dxoloc.list)
+  str(cum.recalc.chr.length)
+  
+  #### Count and correct for Double XO #####
+  # user variables
+  distance <- 50 # distance to be screened on each side for crossovers
+  #distance <- 0.1 # if want to evaluate what happens if no double crossovers are removed
+  
+  # Choose data variable using either cum.dxoloc.list (here: MOTHER) or cum.mxoloc.list (here: FATHER)
+  
+  both.data <- NULL
+  both.data <- list()
+  both.data[[1]] <- cum.dxoloc.list
+  both.data[[2]] <- cum.mxoloc.list
+  names(both.data) <- c("cum.dxoloc.list","cum.mxoloc.list")
+  
+  for(d in 1:length(both.data)){
+    data <- both.data[[d]]
+    print(data)
+    name.of.data <- NULL
+    name.of.data <- names(both.data)[d]
+    print(name.of.data)
+
+      # Set up to obtain the crossovers
+      # NULL variables
+      lower <- NULL; upper <- NULL ; odd.even <- NULL ; current.piece <- NULL
+      indiv.nums <- NULL; counter <- 0 ; XO.spot <- NULL
+      XO.tot.leng <- NULL ; CUMULATIVE.CHR <- NULL
+      per.chromosome.XO <- NULL
+      name <- NULL
+      even.counter <- 0
+      
+      # Create a subset piece from the total list per chromosome
+      for(n in chr) {
+        
+        # new method that instead of using i uses name
+        name <- paste("chr",n,sep="")
+        print(name)
+        
+        # EXPERIMENTAL
+        test <- data[[name]] # take out data from one chromosome
+        print(c("*Treating chromosome", n), quote = F)
+        print(test)
+        per.chromosome.counter <- 0
+        
+        # For each chromosome, count the number of XO per individual
+        indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
+        print(c("**Treating Sample:", indiv.nums), quote=F)
+        
+        # For each chromosome, record the total length
+        XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[name])
+        print(c("***XO.tot.len", XO.tot.leng), quote=F)  
+        
+        # Extract the length of this chromosome
+        current.chr.leng <- NULL
+        current.chr.leng <- XO.tot.leng[name]
+        print(c("THIS ROUND THE CHR IS", XO.tot.leng[name]))
+        
+        # Per chromosome, check each unique indiv
+        for(j in indiv.nums) {
+          indiv.row <- which(test[,1] == (j)) # find row(s) for the indiv of interest (per loop)
+          print(c("THIS IS ****", j))
+          print(c("indiv.row",indiv.row))
+          
+          # Per unique indiv, check each XO (i.e. how many within range?)
+          for(loc in indiv.row) {
+            
+            print("DEFINING RANGE")
+            print(test[(loc),2])
+            lower <- test[(loc),2] - distance
+            upper <- test[(loc),2] + distance
+            print(c(lower, upper))
+            
+            # TRUE for each XO in range
+            print("FOR EACH INDIVIDUAL IN THIS CHR, score TRUE for each XO within range")
+            test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
+            print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
+            
+            # Number of XO within the range
+            print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs on chr")) 
+            
+            # 0 if EVEN, 1 if ODD
+            print("**** 0 if EVEN, 1 if ODD ****")
+            print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2) 
+            
+            # True to add 1 to counter
+            odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
+            print("IS THIS XO ODD OR EVEN")
+            print(odd.even)
+            
+            # If odd number (1), add a XO to the counter; if even (0) do not add
+            if(odd.even == 0) {
+              print("even")
+              counter <- counter
+              even.counter <- even.counter + 1
+            } else {
+              print("odd")
+              
+              # Collect the location of this crossover
+              XO.spot <<- c(XO.spot, print(test[(loc),2]))
+              
+              # Collect the total chromosome length for this crossover
+              CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
+              #print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
+              
+              # Add one to counter
+              counter <- counter + 1 
+              
+              # Add one to per.chromosome.counter
+              per.chromosome.counter <- per.chromosome.counter + 1
+            }
+            print(c("counter", counter))
+          }
+        }
+        print(c("per.chromosome.counter"))
+        print(c(per.chromosome.counter, "chr", i ))
+        per.chromosome.XO[name] <- per.chromosome.counter
+      }
+      
+      counter
+      even.counter
+  
+  # USE THE FOLLOWING VARIABLES TO CREATE OBJECTS: 
+  name.of.data # dxoloc or mxoloc? (stillneed to make for loop)
+  set.name # sets piece
+  
+  # obtain this information
+  collect.me.temp <- XO.spot/CUMULATIVE.CHR
+  index <- paste(set.name, name.of.data, sep="_")
+  collect.me[[index]] <- collect.me.temp
+  
+}
 }
 
-counter
-even.counter
 
 
-# collect info
-## metacentrics
-# XO.spot.CUMULATIVE.CHR.mat.meta <- XO.spot/CUMULATIVE.CHR
-# XO.spot.CUMULATIVE.CHR.pat.meta <- XO.spot/CUMULATIVE.CHR
-## acrocentrics
-# XO.spot.CUMULATIVE.CHR.mat.acro <- XO.spot/CUMULATIVE.CHR
-# XO.spot.CUMULATIVE.CHR.pat.acro <- XO.spot/CUMULATIVE.CHR
-## sex
-# XO.spot.CUMULATIVE.CHR.mat.sex <- XO.spot/CUMULATIVE.CHR
-# XO.spot.CUMULATIVE.CHR.pat.sex <- XO.spot/CUMULATIVE.CHR
+# This should have all you need
+str(collect.me)
 
+names(collect.me)
 
-#### 3. PLOT the male and female graphs #####
+# Plot
 par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 
-all.XO.spots <- NULL
-all.XO.spots <- list()
-all.XO.spots[[1]] <- XO.spot.CUMULATIVE.CHR.mat.meta 
-all.XO.spots[[2]] <- XO.spot.CUMULATIVE.CHR.mat.acro
-all.XO.spots[[3]] <- XO.spot.CUMULATIVE.CHR.mat.sex
-all.XO.spots[[4]] <- XO.spot.CUMULATIVE.CHR.pat.meta 
-all.XO.spots[[5]] <- XO.spot.CUMULATIVE.CHR.pat.acro
-all.XO.spots[[6]] <- XO.spot.CUMULATIVE.CHR.pat.sex
+order <- c(1,3,5,2,4,6)
+1:length(names(collect.me))
 
+# TODO #
+# find way to select odd values then even values
 
-
-# all.XO.spot <- as.list(x = c(XO.spot.CUMULATIVE.CHR.mat.meta
-#                              , XO.spot.CUMULATIVE.CHR.mat.acro))
-# all.XO.spots <- c("XO.spot.CUMULATIVE.CHR.mat.meta", 
-#                   "XO.spot.CUMULATIVE.CHR.mat.acro",
-#                   "XO.spot.CUMULATIVE.CHR.mat.sex",
-#                   "XO.spot.CUMULATIVE.CHR.pat.meta",
-#                   "XO.spot.CUMULATIVE.CHR.pat.acro",
-#                   "XO.spot.CUMULATIVE.CHR.pat.sex"
-#                   )
-
-# set NULL
-chr.set = NULL
 maximum <- 0.10
-#maximum <- 500
+#maximum <- 500 # when freq = T
 
-for (i in 1:length(all.XO.spots)) { 
-  #print(all.XO.spots[[i]]) 
-  chr.set <- all.XO.spots[[i]]
-  #print(length(chr.set))
+for(p in order){
+  chr.set <- collect.me[[p]]
   hist(chr.set*100, xlab = "Relative position of XO (%)", main = ""
        , xlim = c(0,100), las = 1
        , ylim = c(0,maximum)
        # or
        , freq = FALSE# to display as percent
        , breaks = 10
-  )
-  #text(x = 40, y = maximum, labels = paste("total", length(chr.set), "XO"))
+      )
   text(x = 50, y = maximum-0.01, labels = paste("avg/chr ="
-                                                 , round(
-                                                   length(chr.set)/length(unique(names(chr.set)))
-                                                   ,1)))
-  
+                                                , round(
+                                                  length(chr.set)/length(unique(names(chr.set)))
+                                                  ,1)))
+  text(x= 50, y = maximum, labels = names(collect.me)[p])
 }
-
-
-
-# choose a subset
-chr.set <- XO.spot.CUMULATIVE.CHR.mat.meta
-chr.set <- XO.spot.CUMULATIVE.CHR.pat.meta
-
-chr.set <- XO.spot.CUMULATIVE.CHR.mat.acro
-chr.set <- XO.spot.CUMULATIVE.CHR.pat.acro
-
-chr.set <- XO.spot.CUMULATIVE.CHR.mat.sex
-chr.set <- XO.spot.CUMULATIVE.CHR.pat.sex
-
-maximum <- 0.02
-
-# plot
-hist(chr.set*100, xlab = "Relative position of XO (%)", main = ""
-     #, ylim = c(0,maximum)
-     , xlim = c(0,100), las = 1
-     #, freq = FALSE, ylim = c(0,0.02) # to display as percent
-     )
-#text(x = 40, y = maximum, labels = paste("total", length(chr.set), "XO"))
-text(x = 50, y = maximum-0.001, labels = paste("avg/chr ="
-                                         , length(chr.set)/length(unique(names(chr.set)))))
-
-# # paternal
-# hist(chr.set.pat*100, xlab = "Relative position of XO (%)", main = ""
-#      , ylim = c(0,maximum), xlim = c(0,100), las = 1)
-# text(x = 40, y = maximum, labels = paste("pat: n =", length(chr.set.pat), "XO"))
-
-
-# # maternal
-# hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,1000), xlim = c(0,100), las = 1)
-# text(x = 15, y = 900, labels = paste("maternal: n =", length(XO.spot), "XO"))
-# 
-# # paternal
-# hist(XO.spot/CUMULATIVE.CHR*100, xlab = "Relative position of XO (%)", main = "", ylim = c(0,100), xlim = c(0,100), las = 1)
-# text(x = 15, y = 90, labels = paste("paternal: n =", length(XO.spot), "XO"))
 
 # save as 7.3 * 3.8 in portrait
 #or
@@ -724,60 +669,62 @@ text(x = 50, y = maximum-0.001, labels = paste("avg/chr ="
 
 
 
+
+
+
+
+
+#### HERE BE DRAGONS #####
 #### Summary Statistics ####
 #set variables
 #sfqtl
-metacentrics <- c(9,18,1,15,4,7,11,5) #only metacentrics
-acrocentrics <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
-sex.chrom <- 22
-autosomes <- c(1:21,23:42)
-
-
-# sum, average, and 
-print(c("sum"))
-sum(per.chromosome.XO[c(metacentrics)])
-print(c("average"))
-mean(per.chromosome.XO[c(metacentrics)])
-print(c("sd"))
-sd(per.chromosome.XO[c(metacentrics)])
-
-print(c("sum"))
-sum(per.chromosome.XO[c(acrocentrics)])
-print(c("average"))
-mean(per.chromosome.XO[c(acrocentrics)])
-print(c("sd"))
-sd(per.chromosome.XO[c(acrocentrics)])
-
-print(c("sum"))
-sum(per.chromosome.XO[c(sex.chrom)])
-print(c("average"))
-mean(per.chromosome.XO[c(sex.chrom)])
-print(c("sd"))
-sd(per.chromosome.XO[c(sex.chrom)])
-
-print(c("sum"))
-sum(per.chromosome.XO[c(autosomes)])
-print(c("average"))
-mean(per.chromosome.XO[c(autosomes)])
-print(c("sd"))
-sd(per.chromosome.XO[c(autosomes)])
-
-
-
-## attempt to automate summary statistics
-# # summary statistics
-# sum(per.chromosome.XO)[metacentrics]
+# metacentrics <- c(9,18,1,15,4,7,11,5) #only metacentrics
+# acrocentrics <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
+# sex.chrom <- 22
+# autosomes <- c(1:21,23:42)
 # 
-# # set up a vector for your conformation
-# chr.conformation <- NULL
-# chr.conformation[metacentrics] <- "metacentric"
-# chr.conformation[acrocentrics] <- "acrocentric"
 # 
-# # make a dataframe
-# per.chromosome.XO.df <- as.data.frame(cbind(per.chromosome.XO, chr.conformation), row.names = 1:42)
+# # sum, average, and 
+# print(c("sum"))
+# sum(per.chromosome.XO[c(metacentrics)])
+# print(c("average"))
+# mean(per.chromosome.XO[c(metacentrics)])
+# print(c("sd"))
+# sd(per.chromosome.XO[c(metacentrics)])
 # 
-# # perform some tests
-# mean(per.chromosome.XO.df[,2])
-
-
-
+# print(c("sum"))
+# sum(per.chromosome.XO[c(acrocentrics)])
+# print(c("average"))
+# mean(per.chromosome.XO[c(acrocentrics)])
+# print(c("sd"))
+# sd(per.chromosome.XO[c(acrocentrics)])
+# 
+# print(c("sum"))
+# sum(per.chromosome.XO[c(sex.chrom)])
+# print(c("average"))
+# mean(per.chromosome.XO[c(sex.chrom)])
+# print(c("sd"))
+# sd(per.chromosome.XO[c(sex.chrom)])
+# 
+# print(c("sum"))
+# sum(per.chromosome.XO[c(autosomes)])
+# print(c("average"))
+# mean(per.chromosome.XO[c(autosomes)])
+# print(c("sd"))
+# sd(per.chromosome.XO[c(autosomes)])
+# 
+# 
+# ## attempt to automate summary statistics
+# # # summary statistics
+# # sum(per.chromosome.XO)[metacentrics]
+# # 
+# # # set up a vector for your conformation
+# # chr.conformation <- NULL
+# # chr.conformation[metacentrics] <- "metacentric"
+# # chr.conformation[acrocentrics] <- "acrocentric"
+# # 
+# # # make a dataframe
+# # per.chromosome.XO.df <- as.data.frame(cbind(per.chromosome.XO, chr.conformation), row.names = 1:42)
+# # 
+# # # perform some tests
+# # mean(per.chromosome.XO.df[,2])
