@@ -635,27 +635,79 @@ even.counter
 #### 3. PLOT the male and female graphs #####
 par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
 
+all.XO.spots <- NULL
+all.XO.spots <- list()
+all.XO.spots[[1]] <- XO.spot.CUMULATIVE.CHR.mat.meta 
+all.XO.spots[[2]] <- XO.spot.CUMULATIVE.CHR.mat.acro
+all.XO.spots[[3]] <- XO.spot.CUMULATIVE.CHR.mat.sex
+all.XO.spots[[4]] <- XO.spot.CUMULATIVE.CHR.pat.meta 
+all.XO.spots[[5]] <- XO.spot.CUMULATIVE.CHR.pat.acro
+all.XO.spots[[6]] <- XO.spot.CUMULATIVE.CHR.pat.sex
+
+
+
+# all.XO.spot <- as.list(x = c(XO.spot.CUMULATIVE.CHR.mat.meta
+#                              , XO.spot.CUMULATIVE.CHR.mat.acro))
+# all.XO.spots <- c("XO.spot.CUMULATIVE.CHR.mat.meta", 
+#                   "XO.spot.CUMULATIVE.CHR.mat.acro",
+#                   "XO.spot.CUMULATIVE.CHR.mat.sex",
+#                   "XO.spot.CUMULATIVE.CHR.pat.meta",
+#                   "XO.spot.CUMULATIVE.CHR.pat.acro",
+#                   "XO.spot.CUMULATIVE.CHR.pat.sex"
+#                   )
+
+# set NULL
+chr.set = NULL
+maximum <- 0.10
+#maximum <- 500
+
+for (i in 1:length(all.XO.spots)) { 
+  #print(all.XO.spots[[i]]) 
+  chr.set <- all.XO.spots[[i]]
+  #print(length(chr.set))
+  hist(chr.set*100, xlab = "Relative position of XO (%)", main = ""
+       , xlim = c(0,100), las = 1
+       , ylim = c(0,maximum)
+       # or
+       , freq = FALSE# to display as percent
+       , breaks = 10
+  )
+  #text(x = 40, y = maximum, labels = paste("total", length(chr.set), "XO"))
+  text(x = 50, y = maximum-0.01, labels = paste("avg/chr ="
+                                                 , round(
+                                                   length(chr.set)/length(unique(names(chr.set)))
+                                                   ,1)))
+  
+}
+
+
+
 # choose a subset
-chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.meta
-chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.meta
+chr.set <- XO.spot.CUMULATIVE.CHR.mat.meta
+chr.set <- XO.spot.CUMULATIVE.CHR.pat.meta
 
-chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.acro
-chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.acro
+chr.set <- XO.spot.CUMULATIVE.CHR.mat.acro
+chr.set <- XO.spot.CUMULATIVE.CHR.pat.acro
 
-chr.set.mat <- XO.spot.CUMULATIVE.CHR.mat.sex
-chr.set.pat <- XO.spot.CUMULATIVE.CHR.pat.sex
+chr.set <- XO.spot.CUMULATIVE.CHR.mat.sex
+chr.set <- XO.spot.CUMULATIVE.CHR.pat.sex
 
-maximum <- 500
+maximum <- 0.02
 
-# maternal
-hist(chr.set.mat*100, xlab = "Relative position of XO (%)", main = ""
-     , ylim = c(0,maximum), xlim = c(0,100), las = 1)
-text(x = 40, y = maximum, labels = paste("mat: n =", length(chr.set.mat), "XO"))
+# plot
+hist(chr.set*100, xlab = "Relative position of XO (%)", main = ""
+     #, ylim = c(0,maximum)
+     , xlim = c(0,100), las = 1
+     #, freq = FALSE, ylim = c(0,0.02) # to display as percent
+     )
+#text(x = 40, y = maximum, labels = paste("total", length(chr.set), "XO"))
+text(x = 50, y = maximum-0.001, labels = paste("avg/chr ="
+                                         , length(chr.set)/length(unique(names(chr.set)))))
 
-# paternal
-hist(chr.set.pat*100, xlab = "Relative position of XO (%)", main = ""
-     , ylim = c(0,maximum), xlim = c(0,100), las = 1)
-text(x = 40, y = maximum, labels = paste("pat: n =", length(chr.set.pat), "XO"))
+# # paternal
+# hist(chr.set.pat*100, xlab = "Relative position of XO (%)", main = ""
+#      , ylim = c(0,maximum), xlim = c(0,100), las = 1)
+# text(x = 40, y = maximum, labels = paste("pat: n =", length(chr.set.pat), "XO"))
 
 
 # # maternal
