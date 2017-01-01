@@ -452,16 +452,63 @@ autosomes <- c(1:34,36:42)
 #### OBTAIN parentalXO in sets ####
 
 # create an object with directions of which chromosomes to obtain
-sets <- NULL; cross <- NULL; indiv <- NULL; chr = NULL
+cross <- NULL; indiv <- NULL; chr = NULL
 outing <- NULL; outing <- list(); name.of.sets <- NULL
 collect.me <- NULL; collect.me <- list()
 index <- NULL
-sets <- list()
-sets[[1]] <- metacentrics
-sets[[2]] <- acrocentrics
-sets[[3]] <- sex.chrom
+sets <- NULL; sets <- list()
 
-name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
+# # standard
+# sets[[1]] <- metacentrics
+# sets[[2]] <- acrocentrics
+# sets[[3]] <- sex.chrom
+# name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
+
+# all chromosomes individually
+sets[[1]] <- 1
+sets[[2]] <- 2
+sets[[3]] <- 3
+sets[[4]] <- 4
+sets[[5]] <- 5
+sets[[6]] <- 6
+sets[[7]] <- 7
+sets[[8]] <- 8
+sets[[9]] <- 9
+sets[[10]] <- 10
+sets[[11]] <- 11
+sets[[12]] <- 12
+sets[[13]] <- 13
+sets[[14]] <- 14
+sets[[15]] <- 15
+sets[[16]] <- 16
+sets[[17]] <- 17
+sets[[18]] <- 18
+sets[[19]] <- 19
+sets[[20]] <- 20
+sets[[21]] <- 21
+sets[[22]] <- 22
+sets[[23]] <- 23
+sets[[24]] <- 24
+sets[[25]] <- 25
+sets[[26]] <- 26
+sets[[27]] <- 27
+sets[[28]] <- 28
+sets[[29]] <- 29
+sets[[30]] <- 30
+sets[[31]] <- 31
+sets[[32]] <- 32
+sets[[33]] <- 33
+sets[[34]] <- 34
+sets[[35]] <- 35
+sets[[36]] <- 36
+sets[[37]] <- 37
+sets[[38]] <- 38
+sets[[39]] <- 39
+sets[[40]] <- 40
+sets[[41]] <- 41
+sets[[42]] <- 42
+name.of.sets <- seq(1:42)
+
 
 # Loop to subset 
 for(i in 1:length(sets)) {
@@ -636,10 +683,16 @@ str(collect.me)
 names(collect.me)
 
 # Plot
-par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+#standard
+# par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+# order <- c(1,3,5,2,4,6)
+# 1:length(names(collect.me))
 
-order <- c(1,3,5,2,4,6)
-1:length(names(collect.me))
+#individuals
+par(mfrow=c(6,7), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+order <- c(seq(from = 1, to = 84, by = 2)
+           , seq(from = 2, to = 84, by = 2))
+length(order)
 
 # TODO #
 # find way to select odd values then even values
