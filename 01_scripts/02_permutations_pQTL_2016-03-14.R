@@ -145,6 +145,10 @@ results <- capture.output(
       print("Including covariate")
       for(i in 1:nchr(sfon)){
         x.hk=scanone(sfon, method="hk", pheno.col=m, chr=i, addcov=sex)
+        
+        # Here could add in an analysis of interaction effect quite easily # TODO #
+        # Just need to do same as above, but also add intcov=sex, and use a set.seed option to both
+        
         x.perm=scanone(sfon, method="hk", n.perm=num.perm, n.cluster=num.cluster, pheno.col=m, chr=i, addcov=sex, verbose=F)
         print(paste(c("Testing chromosome", i))) # print the chromosome being tested 
         print(summary(x.hk, perms=x.perm, alpha=0.01, pvalues=T, format="tabByCol")) #find the LOD peak for this
