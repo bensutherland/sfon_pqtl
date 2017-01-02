@@ -14,17 +14,24 @@ setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 # Load data from permutation tests
 #load("02_data/sfon_01_output.RData")
 #load("02_data/sfon_02_output.RData")
-#load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance
+#load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance THIS
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_1000perms.RData") # 
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_10000perms.RData") # 
 
 # only female-specific markers
-load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData")
+#load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData")
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,
                   error.prob=0.001, n.draws=256) #note that 4-way cross w sex-specific map assumes constant ratio of female:male recomb rates within inter-marker intervals
 str((sfon$geno[[1]])) # note that there is now probabilities and draws added to each LG
+
+# Data overview
+# these are your phenotypes
+names(ph.no.cov)
+ph.sex.sp
+names(ph.yes.cov)
+
 
 ######### 3A RESULT INTERP, SINGLE QTL, no COV #######
 # Note: uses perms from part 2
@@ -164,6 +171,9 @@ legend("topright", legend = c("T1","T3"), fill = c("red", "black"))
 ######## 3C EXTRACT RESULTS OF CHR-WIDE SIG ######
 summary(scanone.mods[["weight.g_0509_1"]], threshold = 1.2) # for example
 summary(scanone.mods[["weight.g_0509_1"]], threshold = pheno.sig.lod.per.chr[1,"weight.g_0509"])
+
+names(scanone.mods)
+summary(scanone.mods[["cort.delta_6"]], threshold = pheno.sig.lod.per.chr[1,"cort.delta"])
 
 
 # Identify and extract chromosome-wide significant QTL from scanone object:
@@ -615,13 +625,18 @@ qtl.chr <- c(4,5,20,3,4,5,20,34,16,39,20,3,9,36,5,24,6,38,40,24,4,25)
 qtl.name <- c(rep("weight", times = 3), rep("length", times=5), "cfact1", "cfact2", "cfact3",
               rep("sgr2-3", times=3), "egg.diam", "sperm.diam", "d.cort", "d.chlor", "d.osmo", "ghr",
               rep("hemato", times=2))
+#qtl.name <- paste("QTL", seq(1:length(qtl.pos)), sep = "")
+#qtl.name <- seq(1:length(qtl.pos))
+
 
 all.qtl <- makeqtl(cross=sfon, chr=qtl.chr, pos = qtl.pos, qtl.name=qtl.name, what = "draws")
 
 par(mfrow=c(1,1), mar= c(3.5,3.5,1,1.5) + 0.2, mgp = c(2.5,0.75,0))
 plot(all.qtl, chr = qtl.chr, alternate.chrid = T
      , col = c(rep("blue", times=14), rep("black", times=2), rep("red", times=6))
-#     , horizontal = T
-     , justdots=F
+     #, horizontal = T
+     #, justdots=T
       , main = ""
 )
+
+# save as 8x5
