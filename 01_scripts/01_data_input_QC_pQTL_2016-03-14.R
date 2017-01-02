@@ -47,6 +47,30 @@ for(i in 2:33)
   plot.pheno(sfon, pheno.col=i)
 names(sfon$pheno)[29:33] #gene expr phenos are not normally distrib. they are prob linear.
 
+# note that there are some fish with diff maturity index
+par(mfrow=c(1,1))
+plot.pheno(sfon, pheno.col="matur")
+table(sfon$pheno$matur=="+++") # 2
+table(sfon$pheno$matur=="++") # 15
+table(sfon$pheno$matur=="-") # 8
+boxplot(sfon$pheno$leng.cm_0709 ~ sfon$pheno$matur * sfon$pheno$sex, las = 1, ylab = "leng.cm_0709")
+# and this has some indication for outliers in length.
+# TODO # try entire analysis with only samples with matur of "+"
+sfon.matur <- subset(sfon, ind = which(sfon$pheno$matur=="+"))
+plot.pheno(sfon.matur, pheno.col = "matur")
+
+# Note the following
+sex.mature <- as.numeric(pull.pheno(sfon.matur, "sex") == "M")
+sex <- as.numeric(pull.pheno(sfon, "sex") == "M")
+par(mfrow=c(1,2))
+# note no effect for BC04 and BC05 in terms of broad peaks, but BC03 no longer elevated
+plot(scanone(sfon, method="hk", addcov=sex, pheno.col="leng.cm_0709"), main = "sfon", ylab = "leng.cm_0709", alternate.chrid = T, ylim = c(0,6))
+plot(scanone(sfon.matur, method="hk", addcov=sex.mature, pheno.col="leng.cm_0709"), main = "sfon.matur", ylab = "leng.cm_0709", alternate.chrid = T, ylim = c(0,6))
+
+# note the significance viewed at BC38 is gone.
+plot(scanone(sfon, method="hk", addcov=sex, pheno.col="chlor.delta"), main = "sfon", ylab = "chlor.delta", alternate.chrid = T, ylim = c(0,5))
+plot(scanone(sfon.matur, method="hk", addcov=sex.mature, pheno.col="chlor.delta"), main = "sfon.matur", ylab = "chlor.delta", alternate.chrid = T, ylim = c(0,5))
+
 #log transform linear gene.expression
 for(i in 29:33) {
   sfon$pheno[i] = log2(sfon$pheno[i])
@@ -225,12 +249,34 @@ ph.sex.sp <- c("fem.egg.diam","male.sperm.conc","male.sperm.diam")
 
 
 #####1K CORRELATION OF PHENOTYPES #####
-head(pheno.df)
+library('corrplot') #package corrplot
 names(pheno.df)
+to.cor.phenos <- c("weight.g_0709",  "leng.cm_0709", "TCS_T1.T3"
+                   , "condit.fact_T2", "hep.som.ind", "weight_liver.g"
+                   , "chlor.delta", "cort.delta", "osmo.delta"
+                   , "fem.egg.diam", "male.sperm.conc", "male.sperm.diam"
+                   , "hematocr", "plasma.chlor", "plasma.osmo", "plasma.gluc"
+                   , "hep.glyco", "ghr", "igf1", "igfr1")
+# could also do that with subtracting the ones not wanted
 
-cor(pheno.df[,c(1,4,7,12,15:20,24:27)], use = "pairwise")
-pairs(pheno.df[,c(1,4,7,12,15:20,24:27)])
-# it appears that only the weight/length and liver weight/hepatosomatic index are highly correlated
+cor.set <- cor(pheno.df[,to.cor.phenos]
+    , use = "pairwise.complete.obs" # cor bw ea pair var is comp using all compl pairs of obs on those var # note: only works with "pearson" method    
+    )
+
+par(mfrow=c(1,1), mar= c(3,5,3,1) + 0.2, mgp = c(2,0.75,0))
+corrplot(cor.set, method = "circle"
+         #, order="hclust"
+         , addshade = "all"
+         #, type = "lower"
+         #, outline = T
+         , tl.col = "black"
+         , tl.cex = 0.9) #plot matrix
+
+#problem with missing data where all are missing between phenos.
+?corrplot
+
+
+
 
 ######### Find phenotype averages and standard deviations ####
 names(sfon$pheno) # take 2:length(names(sfon$pheno))
