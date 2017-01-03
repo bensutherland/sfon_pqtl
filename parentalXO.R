@@ -445,9 +445,15 @@ ind.females = c(sfon$pheno$sex=="F")
 
 # Identify autosomes, sex chr, metacentrics and acrocentrics (plotGeno uses 'chr' arg)
 metacentrics <- c(1:8)
-acrocentrics <- c(9:34,36:42)
-sex.chrom <- 35
-autosomes <- c(1:34,36:42)
+acrocentrics <- c(9:42)
+
+##This version does not include the sex chromosome as an acrocentric chr
+# metacentrics <- c(1:8)
+# acrocentrics <- c(9:34,36:42)
+
+
+# sex.chrom <- 35
+# autosomes <- c(1:34,36:42)
 
 #### OBTAIN parentalXO in sets ####
 
@@ -461,13 +467,18 @@ sets <- NULL; sets <- list()
 # Choose either a standard run to average over metacentrics and acrocentrics
 # or, choose the special version that runs all chromosomes individually (see below)
 
-# Standard
+# # Standard
 sets[[1]] <- metacentrics
 sets[[2]] <- acrocentrics
-sets[[3]] <- sex.chrom
-name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
+name.of.sets <- c("metacentrics", "acrocentrics")
 
-# Special (all chromosomes individually)
+# # Standard not including sex chr as acro
+# sets[[1]] <- metacentrics
+# sets[[2]] <- acrocentrics
+# sets[[3]] <- sex.chrom
+# name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
+
+# ##Special (all chromosomes individually)
 # sets[[1]] <- 1; sets[[2]] <- 2 ; sets[[3]] <- 3; sets[[4]] <- 4 ; sets[[5]] <- 5; sets[[6]] <- 6; sets[[7]] <- 7
 # sets[[8]] <- 8; sets[[9]] <- 9; sets[[10]] <- 10; sets[[11]] <- 11; sets[[12]] <- 12; sets[[13]] <- 13
 # sets[[14]] <- 14; sets[[15]] <- 15; sets[[16]] <- 16; sets[[17]] <- 17; sets[[18]] <- 18
@@ -652,45 +663,69 @@ names(collect.me)
 
 # Plot either standard or Special that runs each individual chr separately
 
-#Standard
-par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
-order <- c(1,3,5,2,4,6)
+# #Standard
+par(mfrow=c(2,2), mar= c(4,4,0.5,1) + 0.2, mgp = c(2.5,0.75,0))
+order <- c(1,3,2,4)
 1:length(names(collect.me))
 
+# #Standard with sex chr sep
+# par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+# order <- c(1,3,5,2,4,6)
+# 1:length(names(collect.me))
+
 # #Special (individual chromosomes)
-# par(mfrow=c(6,7), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
+# par(mfrow=c(6,7), mar= c(3.5,3.5,0.5,1) + 0.2, mgp = c(2.5,0.75,0))
 # order <- c(seq(from = 1, to = 84, by = 2)
 #            , seq(from = 2, to = 84, by = 2))
 # length(order)
 
+
+# Improve titles
+# Standard:
+names(collect.me)
+names(collect.me) <- c("Metacentrics, Maternal", "Metacentrics, Paternal"
+                       , "Acrocentrics, Maternal", "Acrocentrics, Paternal")
+
+# #Special (Individual chromosomes)
+# first rename to improve readability
+names(collect.me)
+collect.me.newnames <- names(collect.me)
+collect.me.newnames <- gsub(pattern = "cum.dxoloc.list", replacement = "Mat", x = names(collect.me))
+collect.me.newnames <- gsub(pattern = "cum.mxoloc.list", replacement = "Pat", x = collect.me.newnames)
+collect.me.newnames
+names(collect.me) <- collect.me.newnames
+  
 # Plot
 maximum <- 0.10
 #maximum <- 500 # when freq = T
 
+# for special
+#maximum <- 80 # for special
+
+
+# Special
+# just comment out the ylim and the freq
+
 for(p in order){
   chr.set <- collect.me[[p]]
-  hist(chr.set*100, xlab = "Relative position of XO (%)", main = ""
+  hist(chr.set*100, xlab = "Relative Position (%)"
+       , main = ""
        , xlim = c(0,100), las = 1
        , ylim = c(0,maximum)
        # or
-       , freq = FALSE# to display as percent
-       , breaks = 10
+       #, freq = FALSE# to display as percent
+       , breaks = c(seq(from=0, to=100, by=10))
+       , ylab = "Number of XO"
       )
-  text(x = 50, y = maximum-0.01, labels = paste("avg/chr ="
-                                                , round(
-                                                  length(chr.set)/length(unique(names(chr.set)))
-                                                  ,1)))
-  text(x= 50, y = maximum, labels = names(collect.me)[p])
+  #text(x = 50, y = maximum-0.01, labels = paste("avg/chr =", round(length(chr.set)/length(unique(names(chr.set))),1)))
+  text(x= 50, y = maximum-10, labels = names(collect.me)[p])
 }
 
-# save as 7.3 * 3.8 in portrait
-#or
-# save as 7 * 4.5 for six panel
+# save as 6*6 in portrait (4 panel)
+# save as 7*4.5 for six panel
+# save as 12*12 when all indiv
 
-
-# save as 14 by 14 when all indiv
-
-
+#names(collect.me)[p]
 
 
 
