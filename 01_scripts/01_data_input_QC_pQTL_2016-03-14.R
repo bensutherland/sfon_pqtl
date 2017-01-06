@@ -81,27 +81,26 @@ par(mfrow=c(6,6), mar= c(2,3,1,1) + 0.2, mgp = c(2,0.75,0))
 for(i in 2:33) 
   plot.pheno(sfon, pheno.col=i)
 
-#Remove outliers (need to create systematic way to validate removal)
-par(mfrow=c(3,3))
-plot.pheno(sfon, pheno.col="TCS_T1.T2")
-sfon$pheno$TCS_T1.T2[sfon$pheno$TCS_T1.T2 < 0.5] <- NA
+## Remove outliers (need to create systematic way to validate removal)
+# Outliers are visible for the following phenotypes:
+outlier.containing.phenos <- c("TCS_T1.T2", "TCS_T2.T3", "leng.cm_0709"
+                    , "condit.fact_T2", "osmo.delta", "male.sperm.diam"
+                    )
 
-plot.pheno(sfon, pheno.col="TCS_T2.T3")
-sfon$pheno$TCS_T2.T3[sfon$pheno$TCS_T2.T3 > 1.5] <- NA
+# Loop across and remove outliers for each of the above phenotypes (3 x sd)
+low.value = NULL; high.value = NULL; pheno.this.loop = NULL
+for(pheno in 1:length(outlier.containing.phenos)) {
+  pheno.this.loop <- outlier.containing.phenos[pheno]
+  # find the > 3 * SD outlier range for the phenotype
+  low.value <- mean(sfon$pheno[[pheno.this.loop]], na.rm = T) - 3*sd(sfon$pheno[[pheno.this.loop]], na.rm = T)
+  high.value <- mean(sfon$pheno[[pheno.this.loop]], na.rm = T) + 3*sd(sfon$pheno[[pheno.this.loop]], na.rm = T)
+  # change the outliers to NA
+  sfon$pheno[[pheno.this.loop]][sfon$pheno[[pheno.this.loop]] < low.value 
+                       | sfon$pheno[[pheno.this.loop]] > high.value] <- NA
+  }
 
-plot.pheno(sfon, pheno.col="leng.cm_0709")
-sfon$pheno$leng.cm_0709[sfon$pheno$leng.cm_0709 > 30] <- NA
 
-plot.pheno(sfon, pheno.col="condit.fact_T2")
-sfon$pheno$condit.fact_T2[sfon$pheno$condit.fact_T2 < 0.8] <- NA
-
-plot.pheno(sfon, pheno.col="osmo.delta")
-sfon$pheno$osmo.delta[sfon$pheno$osmo.delta < -60] <- NA
-
-plot.pheno(sfon, pheno.col="male.sperm.diam")
-sfon$pheno$male.sperm.diam[sfon$pheno$male.sperm.diam < 2.6] <- NA
-
-#Rename individuals with sex mistakenly identified (based on gonad measure and transcriptome)
+## Rename individuals with sex mistakenly identified (based on gonad measure and transcriptome)
 sfon$pheno$sex[sfon$pheno$male.sperm.conc != "NA"] <- "M"
 sfon$pheno$sex[sfon$pheno$fem.egg.diam != "NA"] <- "F"
 
