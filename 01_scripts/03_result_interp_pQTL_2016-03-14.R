@@ -544,6 +544,206 @@ sfon$geno[[4]]$data[,"7187"]
 sfon$pheno$Fish.ID
 
 
+###3J Specific chromosome-wide GxS interaction effect queries ####
+# Save out the Additional_file_2 as a .csv to find out which are significant
+add.file.2 <- read.csv(file = "02_data/additional_file_2_2017-01-05.csv")
+
+# for the current version, need columns
+names(add.file.2)
+keep <- c("phenotype", "sex.cov.", "chr", "mname")
+add.file.2 <- add.file.2[, keep]
+head(add.file.2)
+add.file.2 <- add.file.2[complete.cases(add.file.2),] # remove any rows with NA (this is to get rid of sex cov rows)
+head(add.file.2)
+length(add.file.2$mname)
+
+# what phenos are to be used
+unique(x = add.file.2$phenotype)
+add.file.2$phenotype
+
+# these are the actual names
+names(ph.yes.cov)
+names(ph.no.cov)
+ph.sex.sp
+
+# phenos
+phenos.w.cov <- c(  rep("weight.g_0509", times = 3)
+                  , rep("weight.g_0709", times = 3)
+                  , rep("weight.g_1109", times = 2)
+                  , rep("leng.cm_0509", times = 4)
+                  , rep("leng.cm_0709", times = 5)
+                  , rep("leng.cm_1109", times = 3)
+                  , "hematocr"
+                  , "cort.delta"
+                  , "chlor.delta"
+                  , "osmo.delta"
+                  )
+phenos.w.cov
+
+chr.cols.w.cov <- c(1:20,30:34)
+chr.w.cov <- add.file.2$chr[chr.cols.w.cov]
+
+# double check
+add.file.2$phenotype[chr.cols.w.cov]
+phenos.w.cov # should match, but need to use this one b/c of changed pheno names
+
+
+# Todo#
+length(chr.cols.w.cov) # why is this wrong?
+
+
+# CORTISOL WITH INTERACTION EFFECT
+# test with a single pheno/chr combination
+out.am.cort.delta.6 <- scanone(sfon, method = "hk", addcov = sex,
+                             pheno.col = "cort.delta", chr = 6)
+out.im.cort.delta.6 <- scanone(sfon, method = "hk", addcov = sex,
+                             pheno.col = "cort.delta", chr = 6
+                             , intcovar=sex)
+# run permutations
+num.perm.chr <- 10000
+num.cluster <- 3
+set.seed(54955149)
+operm.am.cort.delta.6 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                    pheno.col = "cort.delta", chr = 6,
+                    n.cluster = num.cluster)
+set.seed(54955149)
+operm.im.cort.delta.6 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                                 pheno.col = "cort.delta", chr = 6,
+                                 n.cluster = num.cluster
+                                 , intcovar=sex)
+# analyze
+head(operm.am.cort.delta.6) #Note: no pvals assoc. w scanone obj, pvals intro'd by 'summary'
+out.im.cort.delta.6[1,] # each model obj. contains LOD scores, which can be compared
+out.am.cort.delta.6[1,]
+out.im.cort.delta.6[1,] - out.am.cort.delta.6[1,]
+## for easy use, combine full and interactive models
+out.fmim.cort.delta.6 <- c(out.im.cort.delta.6, out.im.cort.delta.6 - out.am.cort.delta.6, 
+              labels=c("f","i"))
+names(out.fmim.cort.delta.6) # note the positions of the full and interactive values
+
+## for easy use, combine full and interactive models with the permutations applied
+operm.fmim.cort.delta.6 <- cbind(operm.im.cort.delta.6, operm.im.cort.delta.6 - operm.am.cort.delta.6,
+                    labels=c("f","i"))
+colnames(operm.im.cort.delta.6) # NOTE that this contains all phenotypes, including those that do not require sex as cov.
+colnames(operm.fmim.cort.delta.6)
+
+# COMPARE RESULTS TO IDENTIFY SIG INTERACTION #
+summary(operm.fmim.cort.delta.6, alpha=0.05) # provides the LOD threshold for p ≤ 0.05
+
+# Check for significance in the full model and in the interactive model alone
+summary(out.fmim.cort.delta.6, perms=operm.fmim.cort.delta.6, format="tabByCol"
+        #, alpha=0.15
+        , pvalues=TRUE
+        )
+# If high LOD comes from the interaction, rather than additive portion, sig ifx.
+# If trait has no sig ifx, check sig in additive model only (interaction uses up power)
+summary(out.am.cort.delta.6, perms=operm.am.cort.delta.6, format="tabByCol", alpha=0.1, pvalues=T)
+
+# in conclusion, 
+# no significant interaction effect
+# lod.f p = 0.0364
+# lod.i p = 0.177
+
+
+
+# Osmolality WITH INTERACTION EFFECT on chr 40
+# test with a single pheno/chr combination
+out.am.osmo.delta.40 <- scanone(sfon, method = "hk", addcov = sex,
+                               pheno.col = "osmo.delta", chr = 40)
+out.im.osmo.delta.40 <- scanone(sfon, method = "hk", addcov = sex,
+                               pheno.col = "osmo.delta", chr = 40
+                               , intcovar=sex)
+# run permutations
+set.seed(54955149)
+operm.am.osmo.delta.40 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                                 pheno.col = "osmo.delta", chr = 40,
+                                 n.cluster = num.cluster)
+set.seed(54955149)
+operm.im.osmo.delta.40 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                                 pheno.col = "osmo.delta", chr = 40,
+                                 n.cluster = num.cluster
+                                 , intcovar=sex)
+# analyze
+head(operm.am.osmo.delta.40) #Note: no pvals assoc. w scanone obj, pvals intro'd by 'summary'
+out.im.osmo.delta.40[1,] # each model obj. contains LOD scores, which can be compared
+out.am.osmo.delta.40[1,]
+out.im.osmo.delta.40[1,] - out.am.osmo.delta.40[1,]
+## for easy use, combine full and interactive models
+out.fmim.osmo.delta.40 <- c(out.im.osmo.delta.40, out.im.osmo.delta.40 - out.am.osmo.delta.40, 
+                           labels=c("f","i"))
+names(out.fmim.osmo.delta.40) # note the positions of the full and interactive values
+
+## for easy use, combine full and interactive models with the permutations applied
+operm.fmim.osmo.delta.40 <- cbind(operm.im.osmo.delta.40, operm.im.osmo.delta.40 - operm.am.osmo.delta.40,
+                                 labels=c("f","i"))
+colnames(operm.im.osmo.delta.40) # NOTE that this contains all phenotypes, including those that do not require sex as cov.
+colnames(operm.fmim.osmo.delta.40)
+
+# COMPARE RESULTS TO IDENTIFY SIG INTERACTION #
+summary(operm.fmim.osmo.delta.40, alpha=0.05) # provides the LOD threshold for p ≤ 0.05
+
+# Check for significance in the full model and in the interactive model alone
+summary(out.fmim.osmo.delta.40, perms=operm.fmim.osmo.delta.40, format="tabByCol"
+        #, alpha=0.15
+        , pvalues=TRUE
+)
+# If high LOD comes from the interaction, rather than additive portion, sig ifx.
+# If trait has no sig ifx, check sig in additive model only (interaction uses up power)
+summary(out.am.osmo.delta.40, perms=operm.am.osmo.delta.40, format="tabByCol", alpha=0.1, pvalues=T)
+
+# in conclusion, osmo 
+# no significant interaction effect 
+# lod.f = 0.027
+# lod.i = 0.365
+
+
+# weight.g_0709 WITH INTERACTION EFFECT (chr20)
+# test with a single pheno/chr combination
+out.am.weight.g_0709.20 <- scanone(sfon, method = "hk", addcov = sex,
+                                pheno.col = "weight.g_0709", chr = 20)
+out.im.weight.g_0709.20 <- scanone(sfon, method = "hk", addcov = sex,
+                                pheno.col = "weight.g_0709", chr = 20
+                                , intcovar=sex)
+# run permutations
+set.seed(54955149)
+operm.am.weight.g_0709.20 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                                  pheno.col = "weight.g_0709", chr = 20,
+                                  n.cluster = num.cluster)
+set.seed(54955149)
+operm.im.weight.g_0709.20 <- scanone(sfon, addcovar=sex, n.perm=num.perm.chr,
+                                  pheno.col = "weight.g_0709", chr = 20,
+                                  n.cluster = num.cluster
+                                  , intcovar=sex)
+# analyze
+head(operm.am.weight.g_0709.20) #Note: no pvals assoc. w scanone obj, pvals intro'd by 'summary'
+out.im.weight.g_0709.20[1,] # each model obj. contains LOD scores, which can be compared
+out.am.weight.g_0709.20[1,]
+out.im.weight.g_0709.20[1,] - out.am.weight.g_0709.20[1,]
+## for easy use, combine full and interactive models
+out.fmim.weight.g_0709.20 <- c(out.im.weight.g_0709.20, out.im.weight.g_0709.20 - out.am.weight.g_0709.20, 
+                            labels=c("f","i"))
+names(out.fmim.weight.g_0709.20) # note the positions of the full and interactive values
+
+## for easy use, combine full and interactive models with the permutations applied
+operm.fmim.weight.g_0709.20 <- cbind(operm.im.weight.g_0709.20, operm.im.weight.g_0709.20 - operm.am.weight.g_0709.20,
+                                  labels=c("f","i"))
+colnames(operm.im.weight.g_0709.20) # NOTE that this contains all phenotypes, including those that do not require sex as cov.
+colnames(operm.fmim.weight.g_0709.20)
+
+# COMPARE RESULTS TO IDENTIFY SIG INTERACTION #
+summary(operm.fmim.weight.g_0709.20, alpha=0.05) # provides the LOD threshold for p ≤ 0.05
+
+# Check for significance in the full model and in the interactive model alone
+summary(out.fmim.weight.g_0709.20, perms=operm.fmim.weight.g_0709.20, format="tabByCol"
+        #, alpha=0.15
+        , pvalues=TRUE
+)
+
+# no significant interaction effect here either.
+# lod.f pval = 0.042
+# lod.i pval = 0.416
+
+
 ####### IDENTIFY ACTUAL GENOS - NEEDS WORK!! ######
 # this should all be correct but required manual back-calc from Rqtl to joinmap to haplotypes from STACKS
 # and also manual obtaining of the column for the required marker
