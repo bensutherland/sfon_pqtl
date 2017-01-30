@@ -692,69 +692,10 @@ for(p in order){
        , breaks = c(seq(from=0, to=100, by=10))
        , ylab = "Number of XO"
       )
-  #text(x = 50, y = maximum-0.01, labels = paste("avg/chr =", round(length(chr.set)/length(unique(names(chr.set))),1)))
-  text(x= 50, y = maximum-10, labels = names(collect.me)[p])
+  text(x = 50, y = maximum-0.02, labels = paste("avg/chr =", round(length(chr.set)/length(unique(names(chr.set))),1)))
+  text(x= 50, y = maximum-0.0025, labels = names(collect.me)[p])
 }
 
 # save as 6*6 in portrait (4 panel)
 # save as 7*4.5 for six panel
 # save as 12*12 when all indiv
-
-#names(collect.me)[p]
-
-
-
-#### HERE BE DRAGONS #####
-#### Summary Statistics ####
-#set variables
-#sfqtl
-# metacentrics <- c(9,18,1,15,4,7,11,5) #only metacentrics
-# acrocentrics <- c(2:3,6,8,10,12:14,16:17,19:42) #acrocentrics
-# sex.chrom <- 22
-# autosomes <- c(1:21,23:42)
-# 
-# 
-# # sum, average, and 
-# print(c("sum"))
-# sum(per.chromosome.XO[c(metacentrics)])
-# print(c("average"))
-# mean(per.chromosome.XO[c(metacentrics)])
-# print(c("sd"))
-# sd(per.chromosome.XO[c(metacentrics)])
-# 
-# print(c("sum"))
-# sum(per.chromosome.XO[c(acrocentrics)])
-# print(c("average"))
-# mean(per.chromosome.XO[c(acrocentrics)])
-# print(c("sd"))
-# sd(per.chromosome.XO[c(acrocentrics)])
-# 
-# print(c("sum"))
-# sum(per.chromosome.XO[c(sex.chrom)])
-# print(c("average"))
-# mean(per.chromosome.XO[c(sex.chrom)])
-# print(c("sd"))
-# sd(per.chromosome.XO[c(sex.chrom)])
-# 
-# print(c("sum"))
-# sum(per.chromosome.XO[c(autosomes)])
-# print(c("average"))
-# mean(per.chromosome.XO[c(autosomes)])
-# print(c("sd"))
-# sd(per.chromosome.XO[c(autosomes)])
-# 
-# 
-# ## attempt to automate summary statistics
-# # # summary statistics
-# # sum(per.chromosome.XO)[metacentrics]
-# # 
-# # # set up a vector for your conformation
-# # chr.conformation <- NULL
-# # chr.conformation[metacentrics] <- "metacentric"
-# # chr.conformation[acrocentrics] <- "acrocentric"
-# # 
-# # # make a dataframe
-# # per.chromosome.XO.df <- as.data.frame(cbind(per.chromosome.XO, chr.conformation), row.names = 1:42)
-# # 
-# # # perform some tests
-# # mean(per.chromosome.XO.df[,2])
