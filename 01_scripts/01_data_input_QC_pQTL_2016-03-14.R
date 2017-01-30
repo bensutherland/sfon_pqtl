@@ -279,18 +279,17 @@ corrplot(cor.set, method = "circle"
 ?corrplot
 
 
-
-#### NEEDS TO BE FIXED ####
-######### Find phenotype averages and standard deviations ####
+######### 1L Find phenotype averages and standard deviations ####
 names(sfon$pheno) # take 2:length(names(sfon$pheno))
 length(names(sfon$pheno))
+
 # find averages for the sexes
-sex.sp.avg.df <- aggregate(sfon$pheno[,2:34], list(sfon$pheno$sex), na.rm = T, FUN=mean)
+sex.sp.avg.df <- aggregate(sfon$pheno[,2:length(names(sfon$pheno))], list(sfon$pheno$sex), na.rm = T, FUN=mean)
 dim(sex.sp.avg.df)
 sex.sp.avg.df
 
 # and standard deviation
-sex.sp.sd.df <- aggregate(sfon$pheno[,2:34], list(sfon$pheno$sex), na.rm = T, FUN=sd)
+sex.sp.sd.df <- aggregate(sfon$pheno[,2:length(names(sfon$pheno))], list(sfon$pheno$sex), na.rm = T, FUN=sd)
 dim(sex.sp.sd.df)
 sex.sp.sd.df
 
@@ -299,30 +298,30 @@ row.names(data) <- c("avg.F","avg.M","sd.F","sd.M")
 
 # because aggregate seems to not work with multiple values, will have to create a loop for that.
 test <- NULL
-# and length (sample sizes)
-for(i in 2:34) {
+# and sample size
+for(i in 2:length(names(sfon$pheno))) {
   test <- aggregate(sfon$pheno[,i] ~ sfon$pheno$sex, FUN = length)
   print(names(sfon$pheno)[i])
   print(test)  
 }
 
 # To assign to object
-test = NULL
+test <- NULL
 test <- as.data.frame(c("temp", "temp"))
-for(i in 2:34) {
+for(i in 2:length(names(sfon$pheno))) {
   test <- cbind(test, aggregate(sfon$pheno[,i] ~ sfon$pheno$sex, FUN = length))
   #print(names(sfon$pheno)[i])
   #print(test)  
 }
+
 dim(test)
+test
+sex.order <- test[,2]
 
-test[1:2,1:10]
-
-sex.order <- test[1:2,2]
 
 subset.samplesizes <- cbind(sex.order, 
-                            test[, seq(3, ncol(test), by = 2)]
-)
+                            test[, seq(3, ncol(test), by = 2)])
+
 colnames(subset.samplesizes) <- c("Group.1", names(sfon$pheno)[-1])
 rownames(subset.samplesizes) <- c("n.fem", "n.mal")
 subset.samplesizes
