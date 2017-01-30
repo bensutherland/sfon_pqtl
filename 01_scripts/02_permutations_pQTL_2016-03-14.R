@@ -12,18 +12,17 @@ require(rlecuyer) #random number generator in parallel
 require(plyr)
 
 # set working directory for the cluster computer
-setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
+# setwd("~/Documents/sfqtl_macpro_2016-09-16/sfon_pqtl")
 
 # Load Part 1 results:
 load("02_data/sfon_01_output.RData")
 
 ## Also can load subset Part 1 results
 #load("02_data/sfon_01_output_subset_only_nnxnp_and_mf_sep.RData") # subset markers
-load("02_data/sfon_01_output_subset_only_nnxnp_and_hkxhk.RData") # subset markers
+#load("02_data/sfon_01_output_subset_only_nnxnp_and_hkxhk.RData") # subset markers
 # sfon <- sfon.males
 # sfon <- sfon.females
 # sfon <- sfon_only_nnxnp
-
 # sfon <- sfon_limited
 
 ## note will need to rerun
