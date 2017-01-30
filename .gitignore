@@ -8,3 +8,4 @@
 *.xlsx
 .DS_Store
 *.pdf
+.Rproj.user

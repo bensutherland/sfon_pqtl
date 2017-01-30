@@ -8,18 +8,15 @@
 # install libraries
 require(qtl)
 
-# Set working directory
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
-
 # Load data from permutation tests
+load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance THIS
+
+# other datasets: (to be cleaned up)
 #load("02_data/sfon_01_output.RData")
 #load("02_data/sfon_02_output.RData")
-#load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance THIS
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_1000perms.RData") # 
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_10000perms.RData") # 
-
-# only female-specific markers
-#load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData")
+#load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData") # only female-specific markers
 
 # For most of the plotting (following) we need to simulate genotypes given observed marker data
 sfon <- sim.geno(sfon, step=2.5,
@@ -195,9 +192,9 @@ chr.wide.output <-
 str(chr.wide.output)
 tail(chr.wide.output, n = 5)
 
-write.csv(chr.wide.output, file = "chr_wide_p0.01_w_10000perms.csv", quote = F, row.names=F)
+write.csv(chr.wide.output, file = "02_data/chr_wide_p0.01_w_10000perms.csv", quote = F, row.names=F)
 # then in terminal:
-# grep -A1 'lod' test.csv | grep -v '--' - | less 
+# grep -A1 'lod' 02_data/chr_wide_p0.01_w_10000perms.csv | grep -v '--' - | less 
 # or redirect to file
 
 ######### 3D RESULT INTERP, SEX AS A BINARY TRAIT #######
@@ -233,7 +230,7 @@ effectplot(sfon, pheno.col= "binary", mname1="83995") # still uses imputation
 
 ######### 3F PLOT DATA, EFFECT PLOTS #######
 
-# This section needs some serious work #
+# This section needs some work #
 
 # find a trait and marker with high lod, with an additive effect
 summary(out.am, perms=operm.am, format="tabByCol", alpha=0.1, pvalues=T)
