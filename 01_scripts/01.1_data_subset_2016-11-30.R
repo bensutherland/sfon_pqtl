@@ -36,15 +36,3 @@ text(x = 35, y = 260, labels = paste("n =", sum(nmar(sfon_limited)), "markers"))
 
 ##export subset data
 save.image(file = "02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData") # to use for heterochiasmy
-
-
-#### REMOVE SPECIFIC INDIV SEX ####
-# Identify male and female individuals
-ind.males = c(sfon_only_nnxnp$pheno$sex=="M")
-ind.females = c(sfon_only_nnxnp$pheno$sex=="F")
-
-sfon.males <- subset(sfon_only_nnxnp, ind=ind.males)
-sfon.females <- subset(sfon_only_nnxnp, ind=ind.females)
-
-#export subset data
-save.image(file = "02_data/sfon_01_output_subset_only_nnxnp_and_mf_sep.RData")
