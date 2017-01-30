@@ -431,11 +431,7 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
 
 
 ###### Load Data ######
-# set working directory
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
-
 # Load Part 1 results:
-# load("02_data/sfon_01_output.RData")
 load("02_data/sfon_01_output_subset_only_efxeg_and_hkxhk.RData")
 sfon_limited
 
@@ -446,14 +442,6 @@ ind.females = c(sfon$pheno$sex=="F")
 # Identify autosomes, sex chr, metacentrics and acrocentrics (plotGeno uses 'chr' arg)
 metacentrics <- c(1:8)
 acrocentrics <- c(9:42)
-
-##This version does not include the sex chromosome as an acrocentric chr
-# metacentrics <- c(1:8)
-# acrocentrics <- c(9:34,36:42)
-
-
-# sex.chrom <- 35
-# autosomes <- c(1:34,36:42)
 
 #### OBTAIN parentalXO in sets ####
 
@@ -471,12 +459,6 @@ sets <- NULL; sets <- list()
 sets[[1]] <- metacentrics
 sets[[2]] <- acrocentrics
 name.of.sets <- c("metacentrics", "acrocentrics")
-
-# # Standard not including sex chr as acro
-# sets[[1]] <- metacentrics
-# sets[[2]] <- acrocentrics
-# sets[[3]] <- sex.chrom
-# name.of.sets <- c("metacentrics","acrocentrics","sex.chrom") # temporary needs to be fix
 
 # ##Special (all chromosomes individually)
 # sets[[1]] <- 1; sets[[2]] <- 2 ; sets[[3]] <- 3; sets[[4]] <- 4 ; sets[[5]] <- 5; sets[[6]] <- 6; sets[[7]] <- 7
@@ -662,16 +644,10 @@ str(collect.me)
 names(collect.me)
 
 # Plot either standard or Special that runs each individual chr separately
-
 # #Standard
 par(mfrow=c(2,2), mar= c(4,4,0.5,1) + 0.2, mgp = c(2.5,0.75,0))
 order <- c(1,3,2,4)
 1:length(names(collect.me))
-
-# #Standard with sex chr sep
-# par(mfrow=c(2,3), mar= c(3,3,0.5,1) + 0.2, mgp = c(2,0.75,0))
-# order <- c(1,3,5,2,4,6)
-# 1:length(names(collect.me))
 
 # #Special (individual chromosomes)
 # par(mfrow=c(6,7), mar= c(3.5,3.5,0.5,1) + 0.2, mgp = c(2.5,0.75,0))
@@ -688,20 +664,19 @@ names(collect.me) <- c("Metacentrics, Maternal", "Metacentrics, Paternal"
 
 # #Special (Individual chromosomes)
 # first rename to improve readability
-names(collect.me)
-collect.me.newnames <- names(collect.me)
-collect.me.newnames <- gsub(pattern = "cum.dxoloc.list", replacement = "Mat", x = names(collect.me))
-collect.me.newnames <- gsub(pattern = "cum.mxoloc.list", replacement = "Pat", x = collect.me.newnames)
-collect.me.newnames
-names(collect.me) <- collect.me.newnames
+# names(collect.me)
+# collect.me.newnames <- names(collect.me)
+# collect.me.newnames <- gsub(pattern = "cum.dxoloc.list", replacement = "Mat", x = names(collect.me))
+# collect.me.newnames <- gsub(pattern = "cum.mxoloc.list", replacement = "Pat", x = collect.me.newnames)
+# collect.me.newnames
+# names(collect.me) <- collect.me.newnames
   
-# Plot
+# Standard Plot
 maximum <- 0.10
 #maximum <- 500 # when freq = T
 
-# for special
+# Special plot 
 #maximum <- 80 # for special
-
 
 # Special
 # just comment out the ylim and the freq
@@ -713,7 +688,7 @@ for(p in order){
        , xlim = c(0,100), las = 1
        , ylim = c(0,maximum)
        # or
-       #, freq = FALSE# to display as percent
+       , freq = FALSE# to display as percent
        , breaks = c(seq(from=0, to=100, by=10))
        , ylab = "Number of XO"
       )
