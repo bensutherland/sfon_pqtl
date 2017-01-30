@@ -3,10 +3,16 @@ sfon_pqtl
 Analyze the Brook Charr genetic map for sex chromosome, heterochiasmy and physiological QTL
 
 ### Requirements:   
+R/qtl `http://www.rqtl.org/download/`   
+corrplot `https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html`      
 
 
 ### Setup:   
 Put raw data files into 02_raw_data, including the following:    
+genotypes file: `Sfon_female_map_v4.3.loc`
+map file: `Sfon_female_map_v4.3.map`   
+phenotypes file: `SFQTL_phenotypes-full.qua`  
+
 
 
 ### Overview:

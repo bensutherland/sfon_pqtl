@@ -10,11 +10,11 @@ rm(list=ls())
 require(qtl)
 
 # Set working directory
-setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
+# setwd("~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl")
 
 ##### IMPORT DATA #####
 sfon <- read.cross(format="mapqtl"
-                   , dir="~/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/02_data", 
+                   , dir="02_data/", 
                    genfile = "Sfon_female_map_v4.3.loc", 
                    mapfile = "Sfon_female_map_v4.3.map", 
                    phefile = "SFQTL_phenotypes-full.qua",
@@ -55,14 +55,17 @@ table(sfon$pheno$matur=="++") # 15
 table(sfon$pheno$matur=="-") # 8
 boxplot(sfon$pheno$leng.cm_0709 ~ sfon$pheno$matur * sfon$pheno$sex, las = 1, ylab = "leng.cm_0709")
 # and this has some indication for outliers in length.
-# TODO # try entire analysis with only samples with matur of "+"
+
+
+# ASIDE # Keep in mind that there is variation in the data in terms of matur index
+# May want to try full analysis with only samples with matur of "+"
 sfon.matur <- subset(sfon, ind = which(sfon$pheno$matur=="+"))
 plot.pheno(sfon.matur, pheno.col = "matur")
-
 # Note the following
 sex.mature <- as.numeric(pull.pheno(sfon.matur, "sex") == "M")
 sex <- as.numeric(pull.pheno(sfon, "sex") == "M")
 par(mfrow=c(1,2))
+
 # note no effect for BC04 and BC05 in terms of broad peaks, but BC03 no longer elevated
 plot(scanone(sfon, method="hk", addcov=sex, pheno.col="leng.cm_0709"), main = "sfon", ylab = "leng.cm_0709", alternate.chrid = T, ylim = c(0,6))
 plot(scanone(sfon.matur, method="hk", addcov=sex.mature, pheno.col="leng.cm_0709"), main = "sfon.matur", ylab = "leng.cm_0709", alternate.chrid = T, ylim = c(0,6))
@@ -70,6 +73,7 @@ plot(scanone(sfon.matur, method="hk", addcov=sex.mature, pheno.col="leng.cm_0709
 # note the significance viewed at BC38 is gone.
 plot(scanone(sfon, method="hk", addcov=sex, pheno.col="chlor.delta"), main = "sfon", ylab = "chlor.delta", alternate.chrid = T, ylim = c(0,5))
 plot(scanone(sfon.matur, method="hk", addcov=sex.mature, pheno.col="chlor.delta"), main = "sfon.matur", ylab = "chlor.delta", alternate.chrid = T, ylim = c(0,5))
+# END ASIDE #
 
 #log transform linear gene.expression
 for(i in 29:33) {
@@ -81,7 +85,7 @@ par(mfrow=c(6,6), mar= c(2,3,1,1) + 0.2, mgp = c(2,0.75,0))
 for(i in 2:33) 
   plot.pheno(sfon, pheno.col=i)
 
-## Remove outliers (need to create systematic way to validate removal)
+## Remove outliers
 # Outliers are visible for the following phenotypes:
 outlier.containing.phenos <- c("TCS_T1.T2", "TCS_T2.T3", "leng.cm_0709"
                     , "condit.fact_T2", "osmo.delta", "male.sperm.diam"
@@ -276,7 +280,7 @@ corrplot(cor.set, method = "circle"
 
 
 
-
+#### NEEDS TO BE FIXED ####
 ######### Find phenotype averages and standard deviations ####
 names(sfon$pheno) # take 2:length(names(sfon$pheno))
 length(names(sfon$pheno))
@@ -333,7 +337,8 @@ avg.sd.n.df <- as.data.frame(rbind(data, subset.samplesizes))
 str(avg.sd.n.df)
 write.csv(x = t(avg.sd.n.df), file = "avg.sd.n.csv", quote = F)
 
+
 #######NOW GO TO PART 2 SCRIPT TO DO SCANONE PERM TESTS#######
 #export CLEANED INPUT DATA FOR SCANONE PERM TESTS #######
-save.image(file = "sfon_01_output.RData") # save out existing data so that it can be reloaded without running all again
+save.image(file = "02_data/sfon_01_output.RData") # save out existing data so that it can be reloaded without running all again
 
