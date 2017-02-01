@@ -10,10 +10,11 @@ require(qtl)
 
 # Load data from permutation tests
 load("02_data/sfon_02_output_gw_and_chr.RData") # both chromosome and genome-wide significance THIS
+#or
+load("02_data/sfon_02_output.RData") # currently set up below USE THIS ONE
 
 # other datasets: (to be cleaned up)
 #load("02_data/sfon_01_output.RData")
-#load("02_data/sfon_02_output.RData")
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_1000perms.RData") # 
 #load("02_data/sfon_02_output_chromosome-wide_p0.01_10000perms.RData") # 
 #load("02_data/sfon_02_output_gw_1000perms_nnxnp_only.RData") # only female-specific markers
@@ -28,6 +29,9 @@ str((sfon$geno[[1]])) # note that there is now probabilities and draws added to 
 names(ph.no.cov)
 ph.sex.sp
 names(ph.yes.cov)
+
+# Need to setup sex as a dataframe for PVE estimates
+sex.df <- as.data.frame(sex)
 
 
 ######### 3A RESULT INTERP, SINGLE QTL, no COV #######
@@ -206,7 +210,7 @@ plot(out.bin, col="red", ylab="LOD score",
 plot(out.bin, col="red", ylab="LOD score",
      alternate.chrid=TRUE
      , bandcol = "lightgrey"
-     )
+    )
 # add significance line
 abline(h = summary(operm.bin, alpha=0.05), lty = 2)
 
@@ -215,6 +219,7 @@ summary(operm.bin, alpha=0.05) # provides the LOD threshold for p ≤ 0.05
 summary(out.bin, perms=operm.bin, alpha=0.05, pvalues=TRUE) # provides the highest position per chromosome where LOD > thresh
 
 # clearly sex-linked chromosome at 35
+# save out as 10 x 4
 
 ######### 3E PLOT DATA, sex markers #######
 # find marker with highest LOD
@@ -432,7 +437,7 @@ qtl.chr.ghr <- makeqtl(sfon, chr=c("24"), pos = c(138), what = "draws")
 out.chr.ghr <- fitqtl(sfon, pheno.col="ghr", qtl=qtl.chr.ghr, formula=y~Q1)
 summary(out.chr.ghr)
 
-# Phenos needing sex as covariate
+# # Phenos needing sex as covariate
 # example how to include sex as additive covariate
 # qtl.pheno <- makeqtl(sfon, chr=c(), pos = c(), what = "draws")
 # out.pheno <- fitqtl(sfon, pheno.col="", qtl=qtl.pheno
@@ -494,7 +499,7 @@ summary(out.chr.osmo.delta)
 #### 3I Effect sizes per mtype per sig marker/trait #####
 # import dataframe of important markers and chromosome
 # Collect the columns: phenotype; chr; and mname -- then put into a .csv
-sig_mname_chr_pheno.df <- as.data.frame(read.csv(file = "/Users/wayne/Documents/bernatchez/01_Sfon_projects/03_Sfon_pQTL/sfon_pqtl/sig_pheno_chr_mname_from_excel.csv", header = T))
+sig_mname_chr_pheno.df <- as.data.frame(read.csv(file = "02_data/sig_pheno_chr_mname_from_excel.csv", header = T))
 head(sig_mname_chr_pheno.df)
 sig_mname_chr_pheno.df[] <- lapply(sig_mname_chr_pheno.df, as.character) #convert the dataframe cols to char
 str(sig_mname_chr_pheno.df)
