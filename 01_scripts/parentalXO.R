@@ -443,6 +443,11 @@ ind.females = c(sfon$pheno$sex=="F")
 metacentrics <- c(1:8)
 acrocentrics <- c(9:42)
 
+## Temporary setting when doing testing
+# metacentrics <- c(1:2)
+# acrocentrics <- c(9:10)
+
+
 #### OBTAIN parentalXO in sets ####
 
 # create an object with directions of which chromosomes to obtain
@@ -451,6 +456,7 @@ outing <- NULL; outing <- list(); name.of.sets <- NULL
 collect.me <- NULL; collect.me <- list()
 index <- NULL
 sets <- NULL; sets <- list()
+even.counter.collect <- NULL
 
 # Choose either a standard run to average over metacentrics and acrocentrics
 # or, choose the special version that runs all chromosomes individually (see below)
@@ -533,6 +539,7 @@ for(i in 1:length(sets)) {
       per.chromosome.XO <- NULL
       name <- NULL
       even.counter <- 0
+      
       
       # Create a subset piece from the total list per chromosome
       for(n in chr) {
@@ -623,6 +630,7 @@ for(i in 1:length(sets)) {
       
       counter
       even.counter
+      even.counter.collect <- c(even.counter.collect, even.counter)
   
   # USE THE FOLLOWING VARIABLES TO CREATE OBJECTS: 
   name.of.data # dxoloc or mxoloc? (stillneed to make for loop)
@@ -636,7 +644,9 @@ for(i in 1:length(sets)) {
 }
 }
 
-
+# to see how many crossovers are removed:
+even.counter.collect
+names(collect.me) # and this is the order they are in
 
 # This should have all you need
 str(collect.me)
