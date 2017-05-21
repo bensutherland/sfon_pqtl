@@ -448,8 +448,8 @@ acrocentrics <- c(9:42)
 # acrocentrics <- c(9:10)
 
 # Identify chr that exhibit res tet and those that do not
-res.tet <- c(1:8,14,28,29,36,37,39,41,42)
-redip <- c(9:13,15:27,30:35,38,40)
+# res.tet <- c(1:8,14,28,29,36,37,39,41,42)
+# redip <- c(9:13,15:27,30:35,38,40)
 
 #### OBTAIN parentalXO in sets ####
 
@@ -470,9 +470,9 @@ sets[[2]] <- acrocentrics
 name.of.sets <- c("metacentrics", "acrocentrics")
 
 # Res. Tet.
-sets[[1]] <- res.tet
-sets[[2]] <- redip
-name.of.sets <- c("res.tet", "redip")
+# sets[[1]] <- res.tet
+# sets[[2]] <- redip
+# name.of.sets <- c("res.tet", "redip")
 
 # ##Special (all chromosomes individually)
 # sets[[1]] <- 1; sets[[2]] <- 2 ; sets[[3]] <- 3; sets[[4]] <- 4 ; sets[[5]] <- 5; sets[[6]] <- 6; sets[[7]] <- 7
@@ -679,6 +679,12 @@ order <- c(1,3,2,4)
 names(collect.me)
 names(collect.me) <- c("Metacentrics, Maternal", "Metacentrics, Paternal"
                        , "Acrocentrics, Maternal", "Acrocentrics, Paternal")
+
+# Res.tet
+# names(collect.me)
+# names(collect.me) <- c("Res.tet, Maternal", "Res.tet, Paternal"
+#                        , "Redip, Maternal", "Redip, Paternal")
+
 
 # #Special (Individual chromosomes)
 # first rename to improve readability
