@@ -275,6 +275,8 @@ corrplot(cor.set, method = "circle"
          , tl.col = "black"
          , tl.cex = 0.9) #plot matrix
 
+# save out as 7 by 7
+
 #problem with missing data where all are missing between phenos.
 ?corrplot
 
