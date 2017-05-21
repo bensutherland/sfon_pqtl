@@ -14,26 +14,26 @@ recalc.chr.length <- NULL
 # An adaptation of the plotGeno() (R/qtl) function in order to obtain the parental crossover locations
 # This produces an object 'mxoloc.per.chr' and 'dxoloc.per.chr', a df w/ ind and loc
 
-parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE, 
-                        cutoff = 4, min.sep = 2, cex = 1.2, ...) 
+parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
+                        cutoff = 4, min.sep = 2, cex = 1.2, ...)
 {
   cross <- x
-  if (!any(class(cross) == "cross")) 
+  if (!any(class(cross) == "cross"))
     stop("Input should have class \"cross\".")
-  if (missing(chr)) 
+  if (missing(chr))
     chr <- names(cross$geno)[1]
   cross <- subset(cross, chr = chr)
-  if (nchr(cross) > 1) 
+  if (nchr(cross) > 1)
     cross <- subset(cross, chr = names(cross$geno)[1])
   if (!missing(ind)) {
-    if (is.null(getid(cross))) 
+    if (is.null(getid(cross)))
       cross$pheno$id <- 1:nind(cross)
-    if (!is.logical(ind)) 
+    if (!is.logical(ind))
       ind <- unique(ind)
     cross <- subset(cross, ind = ind)
   }
   id <- getid(cross)
-  if (is.null(id)) 
+  if (is.null(id))
     id <- 1:nind(cross)
   use.id <- TRUE
   type <- class(cross)[1]
@@ -46,13 +46,13 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
   }
   errors <- matrix(0, ncol = ncol(cross$geno[[1]]$data), nrow = nrow(cross$geno[[1]]$data))
   dimnames(errors) <- dimnames(cross$geno[[1]]$data)
-  top <- top.errorlod(cross, names(cross$geno)[1], cutoff, 
+  top <- top.errorlod(cross, names(cross$geno)[1], cutoff,
                       FALSE)
-  if (length(top) > 0) 
-    for (i in 1:nrow(top)) errors[match(top[i, 2], id), as.character(top[i, 
+  if (length(top) > 0)
+    for (i in 1:nrow(top)) errors[match(top[i, 2], id), as.character(top[i,
                                                                          3])] <- 1
   map <- cross$geno[[1]]$map
-  if (is.matrix(map)) 
+  if (is.matrix(map))
     map <- map[1, ]
   L <- diff(range(map))
   min.d <- L * min.sep/100
@@ -61,95 +61,95 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
   map <- cumsum(c(0, d))
   cross$geno[[1]]$map <- map
   n.ind <- nrow(errors)
-  color <- c("white", "gray60", "black", "green", "orange", 
+  color <- c("white", "gray60", "black", "green", "orange",
              "red")
   data <- cross$geno[[1]]$data
   chrtype <- class(cross$geno[[1]])
-  if (chrtype == "X" && (type == "f2" || type == "bc")) 
-    data <- reviseXdata(type, sexpgm = getsex(cross), geno = data, 
+  if (chrtype == "X" && (type == "f2" || type == "bc"))
+    data <- reviseXdata(type, sexpgm = getsex(cross), geno = data,
                         cross.attr = attributes(cross), force = TRUE)
   if (include.xo) {
     if (type != "4way") {
       xoloc <- locateXO(cross)
-      xoloc <- data.frame(ind = rep(1:length(xoloc), sapply(xoloc, 
+      xoloc <- data.frame(ind = rep(1:length(xoloc), sapply(xoloc,
                                                             length)), loc = unlist(xoloc), stringsAsFactors = TRUE)
     }
     else {
       mcross <- dcross <- cross
       class(mcross)[1] <- class(dcross)[1] <- "bc"
-      mcross$geno[[1]]$data[!is.na(data) & data == 1 | 
+      mcross$geno[[1]]$data[!is.na(data) & data == 1 |
                               data == 3 | data == 5] <- 1
-      mcross$geno[[1]]$data[!is.na(data) & data == 2 | 
+      mcross$geno[[1]]$data[!is.na(data) & data == 2 |
                               data == 4 | data == 6] <- 2
-      mcross$geno[[1]]$data[!is.na(data) & data == 7 | 
+      mcross$geno[[1]]$data[!is.na(data) & data == 7 |
                               data == 8 | data == 9 | data == 10] <- NA
-      dcross$geno[[1]]$data[!is.na(data) & data == 1 | 
+      dcross$geno[[1]]$data[!is.na(data) & data == 1 |
                               data == 2 | data == 7] <- 1
-      dcross$geno[[1]]$data[!is.na(data) & data == 3 | 
+      dcross$geno[[1]]$data[!is.na(data) & data == 3 |
                               data == 4 | data == 8] <- 2
-      dcross$geno[[1]]$data[!is.na(data) & data == 5 | 
+      dcross$geno[[1]]$data[!is.na(data) & data == 5 |
                               data == 6 | data == 9 | data == 10] <- NA
       mxoloc <- locateXO(mcross)
-      mxoloc <- data.frame(ind = rep(1:length(mxoloc), 
-                                     sapply(mxoloc, length)), loc = unlist(mxoloc), 
+      mxoloc <- data.frame(ind = rep(1:length(mxoloc),
+                                     sapply(mxoloc, length)), loc = unlist(mxoloc),
                            stringsAsFactors = TRUE)
       dxoloc <- locateXO(dcross)
-      dxoloc <- data.frame(ind = rep(1:length(dxoloc), 
-                                     sapply(dxoloc, length)), loc = unlist(dxoloc), 
+      dxoloc <- data.frame(ind = rep(1:length(dxoloc),
+                                     sapply(dxoloc, length)), loc = unlist(dxoloc),
                            stringsAsFactors = TRUE)
-      
+
       ## BEN EDIT START ##
       print("mxoloc")
       print(mxoloc)
       mxoloc.per.chr <<- mxoloc
-      
+
       print("dxoloc")
       print(dxoloc)
       dxoloc.per.chr <<- dxoloc
-      
+
       print("NEXT IS MAP LENGTH")
       print(max(map))
       #recalc.chr.length <<- c(recalc.chr.length, max(map)) # ORIGINAL (WORKS)
       recalc.chr.length <<- max(map) # NEW ATTEMPT
-      
+
       ## BEN EDIT FINISH ##
     }
   }
   args <- list(...)
-  if ("main" %in% names(args)) 
+  if ("main" %in% names(args))
     themain <- args$main
   else themain <- paste("Chromosome", names(cross$geno)[1])
-  if ("xlim" %in% names(args)) 
+  if ("xlim" %in% names(args))
     thexlim <- args$xlim
   else thexlim <- NULL
-  if ("ylim" %in% names(args)) 
+  if ("ylim" %in% names(args))
     theylim <- args$ylim
   else theylim <- NULL
   if (type == "4way") {
     jit <- 0.15
     mdata <- data
     ddata <- data
-    mdata[!is.na(data) & (data == 1 | data == 3 | data == 
+    mdata[!is.na(data) & (data == 1 | data == 3 | data ==
                             5)] <- 1
-    mdata[!is.na(data) & (data == 2 | data == 4 | data == 
+    mdata[!is.na(data) & (data == 2 | data == 4 | data ==
                             6)] <- 2
     mdata[!is.na(data) & (data == 7 | data == 8)] <- NA
-    ddata[!is.na(data) & (data == 1 | data == 2 | data == 
+    ddata[!is.na(data) & (data == 1 | data == 2 | data ==
                             7)] <- 1
-    ddata[!is.na(data) & (data == 3 | data == 4 | data == 
+    ddata[!is.na(data) & (data == 3 | data == 4 | data ==
                             8)] <- 2
     ddata[!is.na(data) & (data == 5 | data == 6)] <- NA
     if (horizontal) {
-      if (is.null(thexlim)) 
+      if (is.null(thexlim))
         thexlim <- c(0, max(map))
-      if (is.null(theylim)) 
+      if (is.null(theylim))
         theylim <- c(n.ind + 1, 0)
-      plot(0, 0, type = "n", xlab = "Location (cM)", ylab = "Individual", 
-           main = themain, ylim = theylim, xlim = thexlim, 
+      plot(0, 0, type = "n", xlab = "Location (cM)", ylab = "Individual",
+           main = themain, ylim = theylim, xlim = thexlim,
            yaxt = "n", yaxs = "i")
       segments(0, 1:n.ind - jit, max(map), 1:n.ind - jit)
       segments(0, 1:n.ind + jit, max(map), 1:n.ind + jit)
-      if (use.id) 
+      if (use.id)
         axis(side = 2, at = 1:n.ind, labels = id)
       else axis(side = 2, at = 1:n.ind)
       tind <- rep(1:n.ind, length(map))
@@ -157,56 +157,56 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       ind <- tind
       ind[!is.na(mdata) & mdata != 1] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind - jit, pch = 21, col = "black", bg = color[1], 
+      points(x, ind - jit, pch = 21, col = "black", bg = color[1],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 2] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind - jit, pch = 21, col = "black", bg = color[3], 
+      points(x, ind - jit, pch = 21, col = "black", bg = color[3],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 9] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind - jit, pch = 21, col = "black", bg = color[4], 
+      points(x, ind - jit, pch = 21, col = "black", bg = color[4],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 10] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind - jit, pch = 21, col = "black", bg = color[5], 
+      points(x, ind - jit, pch = 21, col = "black", bg = color[5],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 1] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind + jit, pch = 21, col = "black", bg = color[1], 
+      points(x, ind + jit, pch = 21, col = "black", bg = color[1],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 2] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind + jit, pch = 21, col = "black", bg = color[3], 
+      points(x, ind + jit, pch = 21, col = "black", bg = color[3],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 9] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind + jit, pch = 21, col = "black", bg = color[4], 
+      points(x, ind + jit, pch = 21, col = "black", bg = color[4],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 10] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind + jit, pch = 21, col = "black", bg = color[5], 
+      points(x, ind + jit, pch = 21, col = "black", bg = color[5],
              cex = cex)
       u <- par("usr")
       segments(map, u[3], map, u[3] - 1/2)
@@ -214,29 +214,29 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       if (any(errors != 0)) {
         ind <- rep(1:n.ind, length(map))
         ind[errors != 1] <- NA
-        points(x, ind - jit, pch = 0, col = color[6], 
+        points(x, ind - jit, pch = 0, col = color[6],
                cex = cex + 0.4, lwd = 2)
-        points(x, ind + jit, pch = 0, col = color[6], 
+        points(x, ind + jit, pch = 0, col = color[6],
                cex = cex + 0.4, lwd = 2)
       }
       if (include.xo) {
-        points(mxoloc$loc, mxoloc$ind - jit, pch = 4, 
+        points(mxoloc$loc, mxoloc$ind - jit, pch = 4,
                col = "blue", lwd = 2)
-        points(dxoloc$loc, dxoloc$ind + jit, pch = 4, 
+        points(dxoloc$loc, dxoloc$ind + jit, pch = 4,
                col = "blue", lwd = 2)
       }
     }
     else {
-      if (is.null(theylim)) 
+      if (is.null(theylim))
         theylim <- c(max(map), 0)
-      if (is.null(thexlim)) 
+      if (is.null(thexlim))
         thexlim <- c(0, n.ind + 1)
-      plot(0, 0, type = "n", ylab = "Location (cM)", xlab = "Individual", 
-           main = themain, xlim = thexlim, ylim = theylim, 
+      plot(0, 0, type = "n", ylab = "Location (cM)", xlab = "Individual",
+           main = themain, xlim = thexlim, ylim = theylim,
            xaxt = "n", xaxs = "i")
       segments(1:n.ind - jit, 0, 1:n.ind - jit, max(map))
       segments(1:n.ind + jit, 0, 1:n.ind + jit, max(map))
-      if (use.id) 
+      if (use.id)
         axis(side = 1, at = 1:n.ind, labels = id)
       else axis(side = 1, at = 1:n.ind)
       tind <- rep(1:n.ind, length(map))
@@ -244,56 +244,56 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       ind <- tind
       ind[!is.na(mdata) & mdata != 1] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind - jit, y, pch = 21, col = "black", bg = color[1], 
+      points(ind - jit, y, pch = 21, col = "black", bg = color[1],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 2] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind - jit, y, pch = 21, col = "black", bg = color[3], 
+      points(ind - jit, y, pch = 21, col = "black", bg = color[3],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 9] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind - jit, y, pch = 21, col = "black", bg = color[4], 
+      points(ind - jit, y, pch = 21, col = "black", bg = color[4],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(mdata)] <- NA
       ind <- tind
       ind[!is.na(mdata) & mdata != 10] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind - jit, y, pch = 21, col = "black", bg = color[5], 
+      points(ind - jit, y, pch = 21, col = "black", bg = color[5],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 1] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind + jit, y, pch = 21, col = "black", bg = color[1], 
+      points(ind + jit, y, pch = 21, col = "black", bg = color[1],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 2] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind + jit, y, pch = 21, col = "black", bg = color[3], 
+      points(ind + jit, y, pch = 21, col = "black", bg = color[3],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 9] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind + jit, y, pch = 21, col = "black", bg = color[4], 
+      points(ind + jit, y, pch = 21, col = "black", bg = color[4],
              cex = cex)
       tind <- rep(1:n.ind, length(map))
       tind[is.na(ddata)] <- NA
       ind <- tind
       ind[!is.na(ddata) & ddata != 10] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind + jit, y, pch = 21, col = "black", bg = color[5], 
+      points(ind + jit, y, pch = 21, col = "black", bg = color[5],
              cex = cex)
       u <- par("usr")
       segments(u[1], map, (u[1] + 1)/2, map)
@@ -301,30 +301,30 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       if (any(errors != 0)) {
         ind <- rep(1:n.ind, length(map))
         ind[errors != 1] <- NA
-        points(ind - jit, y, pch = 0, col = color[6], 
+        points(ind - jit, y, pch = 0, col = color[6],
                cex = cex + 0.4, lwd = 2)
-        points(ind + jit, y, pch = 0, col = color[6], 
+        points(ind + jit, y, pch = 0, col = color[6],
                cex = cex + 0.4, lwd = 2)
       }
       if (include.xo) {
-        points(mxoloc$ind - jit, mxoloc$loc, pch = 4, 
+        points(mxoloc$ind - jit, mxoloc$loc, pch = 4,
                col = "blue", lwd = 2)
-        points(dxoloc$ind + jit, dxoloc$loc, pch = 4, 
+        points(dxoloc$ind + jit, dxoloc$loc, pch = 4,
                col = "blue", lwd = 2)
       }
     }
   }
   else {
     if (horizontal) {
-      if (is.null(thexlim)) 
+      if (is.null(thexlim))
         thexlim <- c(0, max(map))
-      if (is.null(theylim)) 
+      if (is.null(theylim))
         theylim <- c(n.ind + 0.5, 0.5)
-      plot(0, 0, type = "n", xlab = "Location (cM)", ylab = "Individual", 
-           main = themain, ylim = theylim, xlim = thexlim, 
+      plot(0, 0, type = "n", xlab = "Location (cM)", ylab = "Individual",
+           main = themain, ylim = theylim, xlim = thexlim,
            yaxt = "n")
       segments(0, 1:n.ind, max(map), 1:n.ind)
-      if (use.id) 
+      if (use.id)
         axis(side = 2, at = 1:n.ind, labels = id)
       else axis(side = 2)
       tind <- rep(1:n.ind, length(map))
@@ -332,29 +332,29 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       ind <- tind
       ind[!is.na(data) & data != 1] <- NA
       x <- rep(map, rep(n.ind, length(map)))
-      points(x, ind, pch = 21, col = "black", bg = color[1], 
+      points(x, ind, pch = 21, col = "black", bg = color[1],
              cex = cex)
       ind <- tind
       ind[!is.na(data) & data != 2] <- NA
-      if (type == "f2" || (type == "bc" && chrtype == "X")) 
-        points(x, ind, pch = 21, col = "black", bg = color[2], 
+      if (type == "f2" || (type == "bc" && chrtype == "X"))
+        points(x, ind, pch = 21, col = "black", bg = color[2],
                cex = cex)
-      else points(x, ind, pch = 21, col = "black", bg = color[3], 
+      else points(x, ind, pch = 21, col = "black", bg = color[3],
                   cex = cex)
       if (type == "f2" || (type == "bc" && chrtype == "X")) {
         ind <- tind
         ind[!is.na(data) & data != 3] <- NA
-        points(x, ind, pch = 21, col = "black", bg = color[3], 
+        points(x, ind, pch = 21, col = "black", bg = color[3],
                cex = cex)
       }
       if (type == "f2") {
         ind <- tind
         ind[!is.na(data) & data != 4] <- NA
-        points(x, ind, pch = 21, col = "black", bg = color[4], 
+        points(x, ind, pch = 21, col = "black", bg = color[4],
                cex = cex)
         ind <- tind
         ind[!is.na(data) & data != 5] <- NA
-        points(x, ind, pch = 21, col = "black", bg = color[5], 
+        points(x, ind, pch = 21, col = "black", bg = color[5],
                cex = cex)
       }
       u <- par("usr")
@@ -363,23 +363,23 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       if (any(errors != 0)) {
         ind <- rep(1:n.ind, length(map))
         ind[errors != 1] <- NA
-        points(x, ind, pch = 0, col = color[6], cex = cex + 
+        points(x, ind, pch = 0, col = color[6], cex = cex +
                  0.4, lwd = 2)
       }
-      if (include.xo) 
-        points(xoloc$loc, xoloc$ind, pch = 4, col = "blue", 
+      if (include.xo)
+        points(xoloc$loc, xoloc$ind, pch = 4, col = "blue",
                lwd = 2)
     }
     else {
-      if (is.null(theylim)) 
+      if (is.null(theylim))
         theylim <- c(max(map), 0)
-      if (is.null(thexlim)) 
+      if (is.null(thexlim))
         thexlim <- c(0.5, n.ind + 0.5)
-      plot(0, 0, type = "n", ylab = "Location (cM)", xlab = "Individual", 
-           main = themain, xlim = thexlim, ylim = theylim, 
+      plot(0, 0, type = "n", ylab = "Location (cM)", xlab = "Individual",
+           main = themain, xlim = thexlim, ylim = theylim,
            xaxt = "n")
       segments(1:n.ind, 0, 1:n.ind, max(map))
-      if (use.id) 
+      if (use.id)
         axis(side = 1, at = 1:n.ind, labels = id)
       else axis(side = 1)
       tind <- rep(1:n.ind, length(map))
@@ -387,29 +387,29 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       ind <- tind
       ind[!is.na(data) & data != 1] <- NA
       y <- rep(map, rep(n.ind, length(map)))
-      points(ind, y, pch = 21, col = "black", bg = "white", 
+      points(ind, y, pch = 21, col = "black", bg = "white",
              cex = cex)
       ind <- tind
       ind[!is.na(data) & data != 2] <- NA
-      if (type == "f2" || (type == "bc" && chrtype == "X")) 
-        points(ind, y, pch = 21, col = "black", bg = color[2], 
+      if (type == "f2" || (type == "bc" && chrtype == "X"))
+        points(ind, y, pch = 21, col = "black", bg = color[2],
                cex = cex)
-      else points(ind, y, pch = 21, col = "black", bg = color[3], 
+      else points(ind, y, pch = 21, col = "black", bg = color[3],
                   cex = cex)
       if (type == "f2" || (type == "bc" && chrtype == "X")) {
         ind <- tind
         ind[!is.na(data) & data != 3] <- NA
-        points(ind, y, pch = 21, col = "black", bg = color[3], 
+        points(ind, y, pch = 21, col = "black", bg = color[3],
                cex = cex)
       }
       if (type == "f2") {
         ind <- tind
         ind[!is.na(data) & data != 4] <- NA
-        points(ind, y, pch = 21, col = "black", bg = color[4], 
+        points(ind, y, pch = 21, col = "black", bg = color[4],
                cex = cex)
         ind <- tind
         ind[!is.na(data) & data != 5] <- NA
-        points(ind, y, pch = 21, col = "black", bg = color[5], 
+        points(ind, y, pch = 21, col = "black", bg = color[5],
                cex = cex)
       }
       u <- par("usr")
@@ -418,11 +418,11 @@ parentalXO <- function (x, chr, ind, include.xo = TRUE, horizontal = TRUE,
       if (any(errors != 0)) {
         ind <- rep(1:n.ind, length(map))
         ind[errors != 1] <- NA
-        points(ind, y, pch = 0, col = color[6], cex = cex + 
+        points(ind, y, pch = 0, col = color[6], cex = cex +
                  0.4, lwd = 2)
       }
-      if (include.xo) 
-        points(xoloc$ind, xoloc$loc, pch = 4, col = "blue", 
+      if (include.xo)
+        points(xoloc$ind, xoloc$loc, pch = 4, col = "blue",
                lwd = 2)
     }
   }
@@ -447,6 +447,9 @@ acrocentrics <- c(9:42)
 # metacentrics <- c(1:2)
 # acrocentrics <- c(9:10)
 
+# Identify chr that exhibit res tet and those that do not
+res.tet <- c(1:8,14,28,29,36,37,39,41,42)
+redip <- c(9:13,15:27,30:35,38,40)
 
 #### OBTAIN parentalXO in sets ####
 
@@ -466,6 +469,11 @@ sets[[1]] <- metacentrics
 sets[[2]] <- acrocentrics
 name.of.sets <- c("metacentrics", "acrocentrics")
 
+# Res. Tet.
+sets[[1]] <- res.tet
+sets[[2]] <- redip
+name.of.sets <- c("res.tet", "redip")
+
 # ##Special (all chromosomes individually)
 # sets[[1]] <- 1; sets[[2]] <- 2 ; sets[[3]] <- 3; sets[[4]] <- 4 ; sets[[5]] <- 5; sets[[6]] <- 6; sets[[7]] <- 7
 # sets[[8]] <- 8; sets[[9]] <- 9; sets[[10]] <- 10; sets[[11]] <- 11; sets[[12]] <- 12; sets[[13]] <- 13
@@ -477,53 +485,53 @@ name.of.sets <- c("metacentrics", "acrocentrics")
 # sets[[39]] <- 39; sets[[40]] <- 40; sets[[41]] <- 41; sets[[42]] <- 42
 # name.of.sets <- seq(1:42)
 
-# Loop to subset 
+# Loop to subset
 for(i in 1:length(sets)) {
   set.name <- NULL
   set.name <- name.of.sets[i]
   print(set.name) #provide a name for the set
-  
+
   #subset data
   cross <- subset(sfon_limited, chr = sets[[i]])
   print(nchr(cross))
   indiv <- 1:nind(cross) # for full set
   #indiv <- 1:10
   chr <- as.numeric(names(cross$geno))
-  
+
   # Obtain parentalXO in selected set
   # set NULL
-  cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL 
+  cum.mxoloc.list <- list(NULL) ; cum.dxoloc.list <- list(NULL) ; recalc.chr.length <- NULL
   cum.recalc.chr.length <- NULL; name <- NULL
-  
+
   for(c in chr) {
     parentalXO(cross, chr = c, ind = indiv)
-    
+
     # new method that instead of using i uses name
     name <- paste("chr",c,sep="") # BETTER
     print(name)
-    
+
     cum.mxoloc.list[[name]] <- mxoloc.per.chr
     cum.dxoloc.list[[name]] <- dxoloc.per.chr
     cum.recalc.chr.length[[name]] <- recalc.chr.length
   }
-  
+
   str(cum.mxoloc.list)
   str(cum.dxoloc.list)
   str(cum.recalc.chr.length)
-  
+
   #### Count and correct for Double XO #####
   # user variables
   distance <- 50 # distance to be screened on each side for crossovers
   #distance <- 0.1 # if want to evaluate what happens if no double crossovers are removed
-  
+
   # Choose data variable using either cum.dxoloc.list (here: MOTHER) or cum.mxoloc.list (here: FATHER)
-  
+
   both.data <- NULL
   both.data <- list()
   both.data[[1]] <- cum.dxoloc.list
   both.data[[2]] <- cum.mxoloc.list
   names(both.data) <- c("cum.dxoloc.list","cum.mxoloc.list")
-  
+
   for(d in 1:length(both.data)){
     data <- both.data[[d]]
     print(data)
@@ -539,66 +547,66 @@ for(i in 1:length(sets)) {
       per.chromosome.XO <- NULL
       name <- NULL
       even.counter <- 0
-      
-      
+
+
       # Create a subset piece from the total list per chromosome
       for(n in chr) {
-        
+
         # new method that instead of using i uses name
         name <- paste("chr",n,sep="")
         print(name)
-        
+
         # EXPERIMENTAL
         test <- data[[name]] # take out data from one chromosome
         print(c("*Treating chromosome", n), quote = F)
         print(test)
         per.chromosome.counter <- 0
-        
+
         # For each chromosome, count the number of XO per individual
         indiv.nums <- unique(test[,1]) # identify the unique sample names in 'test'
         print(c("**Treating Sample:", indiv.nums), quote=F)
-        
+
         # For each chromosome, record the total length
         XO.tot.leng <- c(XO.tot.leng,  cum.recalc.chr.length[name])
-        print(c("***XO.tot.len", XO.tot.leng), quote=F)  
-        
+        print(c("***XO.tot.len", XO.tot.leng), quote=F)
+
         # Extract the length of this chromosome
         current.chr.leng <- NULL
         current.chr.leng <- XO.tot.leng[name]
         print(c("THIS ROUND THE CHR IS", XO.tot.leng[name]))
-        
+
         # Per chromosome, check each unique indiv
         for(j in indiv.nums) {
           indiv.row <- which(test[,1] == (j)) # find row(s) for the indiv of interest (per loop)
           print(c("THIS IS ****", j))
           print(c("indiv.row",indiv.row))
-          
+
           # Per unique indiv, check each XO (i.e. how many within range?)
           for(loc in indiv.row) {
-            
+
             print("DEFINING RANGE")
             print(test[(loc),2])
             lower <- test[(loc),2] - distance
             upper <- test[(loc),2] + distance
             print(c(lower, upper))
-            
+
             # TRUE for each XO in range
             print("FOR EACH INDIVIDUAL IN THIS CHR, score TRUE for each XO within range")
-            test[indiv.row, 2] > lower & test[indiv.row, 2] < upper 
+            test[indiv.row, 2] > lower & test[indiv.row, 2] < upper
             print( test[indiv.row, 2] > lower & test[indiv.row, 2] < upper )
-            
+
             # Number of XO within the range
-            print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs on chr")) 
-            
+            print(c(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper), "XOs on chr"))
+
             # 0 if EVEN, 1 if ODD
             print("**** 0 if EVEN, 1 if ODD ****")
-            print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2) 
-            
+            print(length(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)%%2)
+
             # True to add 1 to counter
             odd.even <- table(test[indiv.row, 2] > lower & test[indiv.row, 2] < upper)["TRUE"]%%2
             print("IS THIS XO ODD OR EVEN")
             print(odd.even)
-            
+
             # If odd number (1), add a XO to the counter; if even (0) do not add
             if(odd.even == 0) {
               print("even")
@@ -606,17 +614,17 @@ for(i in 1:length(sets)) {
               even.counter <- even.counter + 1
             } else {
               print("odd")
-              
+
               # Collect the location of this crossover
               XO.spot <<- c(XO.spot, print(test[(loc),2]))
-              
+
               # Collect the total chromosome length for this crossover
               CUMULATIVE.CHR <<- c(CUMULATIVE.CHR, current.chr.leng)
               #print(c("CUMULATIVE.CHR", CUMULATIVE.CHR))
-              
+
               # Add one to counter
-              counter <- counter + 1 
-              
+              counter <- counter + 1
+
               # Add one to per.chromosome.counter
               per.chromosome.counter <- per.chromosome.counter + 1
             }
@@ -627,20 +635,20 @@ for(i in 1:length(sets)) {
         print(c(per.chromosome.counter, "chr", i ))
         per.chromosome.XO[name] <- per.chromosome.counter
       }
-      
+
       counter
       even.counter
       even.counter.collect <- c(even.counter.collect, even.counter)
-  
-  # USE THE FOLLOWING VARIABLES TO CREATE OBJECTS: 
+
+  # USE THE FOLLOWING VARIABLES TO CREATE OBJECTS:
   name.of.data # dxoloc or mxoloc? (stillneed to make for loop)
   set.name # sets piece
-  
+
   # obtain this information
   collect.me.temp <- XO.spot/CUMULATIVE.CHR
   index <- paste(set.name, name.of.data, sep="_")
   collect.me[[index]] <- collect.me.temp
-  
+
 }
 }
 
@@ -680,12 +688,12 @@ names(collect.me) <- c("Metacentrics, Maternal", "Metacentrics, Paternal"
 # collect.me.newnames <- gsub(pattern = "cum.mxoloc.list", replacement = "Pat", x = collect.me.newnames)
 # collect.me.newnames
 # names(collect.me) <- collect.me.newnames
-  
+
 # Standard Plot
 maximum <- 0.10
 #maximum <- 500 # when freq = T
 
-# Special plot 
+# Special plot
 #maximum <- 80 # for special
 
 # Special
